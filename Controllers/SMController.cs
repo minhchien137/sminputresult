@@ -64,7 +64,7 @@ namespace SMInputProduction.Controllers
                 if (existing != null)
                 {
                     before = GetTimeValue(existing, dto.TimeSlot);
-                    after  = before + dto.Quantity.Value;
+                    after  = dto.Quantity.Value;
 
                     // UPDATE đúng cột TimeSlot bằng raw SQL
                     var updateSql = $@"UPDATE SVN_Production_result_Viindoo
@@ -118,7 +118,7 @@ namespace SMInputProduction.Controllers
                     QuantityAfter  = after,
                     WC             = "FG",
                     Shift          = "day",
-                    CreatedAt      = DateTime.Now,
+                    CreatedAt      = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("China Standard Time")),
                     ClientIp       = clientIp,
                     Note           = dto.Note
                 });

@@ -522,7 +522,6 @@
                         <option value="Time3">Time 3 (12h30-15h30)</option>
                         <option value="Time4">Time 4 (15h30-17h30)</option>
                         <option value="Time5">Time 5 (18h30-21h)</option>
-                        <option value="Time6">Time 6 (21h30-8h)</option>
                     </select>
                     <div id="currentBadge" class="current-badge hidden">
                         <span class="badge-dot"></span>
@@ -546,7 +545,7 @@
                     <div class="time-summary">
                         <div class="time-summary-title" data-i18n="summary_title">📊 Today's Totals</div>
                         <div class="time-grid" id="timeGrid">
-                            @foreach (var t in new[]{"Time1","Time2","Time3","Time4","Time5","Time6"})
+                            @foreach (var t in new[]{"Time1","Time2","Time3","Time4","Time5"})
                             {
                                 <div class="time-cell" id="cell_@t">
                                     <div class="time-cell-label">@t</div>
@@ -605,8 +604,22 @@
         $('#timeSelect').select2({ width: '100%', placeholder: t.placeholder_time, minimumResultsForSearch: Infinity });
     }
 
+    function getAutoTimeSlot() {
+        const now = new Date();
+        const h = now.getHours();
+        const m = now.getMinutes();
+        const t = h * 60 + m;
+        if (t >= 480  && t < 600)  return 'Time1'; // 8:00–10:00
+        if (t >= 600  && t < 720)  return 'Time2'; // 10:00–12:00
+        if (t >= 750  && t < 930)  return 'Time3'; // 12:30–15:30
+        if (t >= 930  && t < 1050) return 'Time4'; // 15:30–17:30
+        if (t >= 1110 && t < 1260) return 'Time5'; // 18:30–21:00
+        return '';
+    }
+
     $(document).ready(function () {
         initSelect2();
+
 
         $('#typeSelect, #operationSelect').on('change', function () {
             const type = $('#typeSelect').val();
@@ -635,6 +648,11 @@
         if (!$('#typeSelect').val())      { $('#typeSelect').trigger('change.select2'); }
         if (!$('#operationSelect').val()) { $('#operationSelect').trigger('change.select2'); }
         if (!$('#timeSelect').val())      { $('#timeSelect').trigger('change.select2'); }
+        // Auto-select time slot based on China time if nothing selected
+        if (!$('#timeSelect').val()) {
+            const autoSlot = getAutoTimeSlot();
+            if (autoSlot) $('#timeSelect').val(autoSlot).trigger('change');
+        }
         // Refresh badge text if visible
         const slot = $('#timeSelect').val();
         if (slot) updateCurrentBadge(slot);
@@ -657,8 +675,8 @@
     }
 
     function renderSummary(data) {
-        const keys   = ['time1','time2','time3','time4','time5','time6'];
-        const labels = ['Time1','Time2','Time3','Time4','Time5','Time6'];
+        const keys   = ['time1','time2','time3','time4','time5'];
+        const labels = ['Time1','Time2','Time3','Time4','Time5'];
         const selectedTime = ($('#timeSelect').val() || '').toLowerCase();
         let hasData = false;
 
@@ -678,7 +696,7 @@
 
     function hideSummary() {
         document.getElementById('timeSummaryWrap').style.display = 'none';
-        ['Time1','Time2','Time3','Time4','Time5','Time6'].forEach(function (t) {
+        ['Time1','Time2','Time3','Time4','Time5'].forEach(function (t) {
             var v = document.getElementById('val_' + t);
             if (v) v.textContent = '0';
             var c = document.getElementById('cell_' + t);
@@ -694,7 +712,7 @@
         const key = timeSlot.toLowerCase();
         const val = _currentValues[key] ?? 0;
 
-        ['Time1','Time2','Time3','Time4','Time5','Time6'].forEach(function (tm) {
+        ['Time1','Time2','Time3','Time4','Time5'].forEach(function (tm) {
             const c = document.getElementById('cell_' + tm);
             const v = _currentValues[tm.toLowerCase()] ?? 0;
             if (c) c.classList.toggle('active', tm.toLowerCase() === key && v > 0);

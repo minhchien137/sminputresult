@@ -60,7 +60,7 @@ namespace SMInputProduction.Models
         [MaxLength(15)]
         public string? Shift { get; set; }
 
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime CreatedAt { get; set; } = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("China Standard Time"));
 
     
         [MaxLength(60)]

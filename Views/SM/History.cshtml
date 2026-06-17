@@ -355,7 +355,6 @@
                         <option value="Time3">Time 3</option>
                         <option value="Time4">Time 4</option>
                         <option value="Time5">Time 5</option>
-                        <option value="Time6">Time 6</option>
                     </select>
                 </div>
 
@@ -404,7 +403,6 @@
             <table>
                 <thead>
                     <tr>
-                        <th data-i18n="tbl_id">#ID</th>
                         <th data-i18n="tbl_date">Prod Date</th>
                         <th data-i18n="tbl_type">Type</th>
                         <th data-i18n="tbl_op">Operation</th>
@@ -413,12 +411,10 @@
                         <th data-i18n="tbl_before">Before</th>
                         <th data-i18n="tbl_after">After</th>
                         <th data-i18n="tbl_saved">Saved At</th>
-                        <th data-i18n="tbl_ip">IP</th>
-                        <th data-i18n="tbl_note">Note</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody">
-                    <tr><td colspan="11">
+                    <tr><td colspan="8">
                         <div class="loading-state"><div class="spinner"></div><p id="initLoadingText">Loading...</p></div>
                     </td></tr>
                 </tbody>
@@ -496,7 +492,7 @@
         const dateTo      = document.getElementById('filterDateTo').value;
 
         const loadingHTML = `<div class="loading-state"><div class="spinner"></div><p>${t('loading')}</p></div>`;
-        document.getElementById('tableBody').innerHTML   = `<tr><td colspan="11">${loadingHTML}</td></tr>`;
+        document.getElementById('tableBody').innerHTML   = `<tr><td colspan="8">${loadingHTML}</td></tr>`;
         document.getElementById('cardList').innerHTML    = loadingHTML;
         document.getElementById('paginationBar').style.display = 'none';
         document.getElementById('recordCount').textContent = t('loading');
@@ -517,7 +513,7 @@
         } catch (e) {
             console.error('GetInputHistory error:', e);
             const errHTML = `<div class="empty-state"><div class="empty-state-icon">⚠️</div><p>${t('load_err')}: ${escHtml(e.message)}</p></div>`;
-            document.getElementById('tableBody').innerHTML = `<tr><td colspan="11">${errHTML}</td></tr>`;
+            document.getElementById('tableBody').innerHTML = `<tr><td colspan="8">${errHTML}</td></tr>`;
             document.getElementById('cardList').innerHTML  = errHTML;
             document.getElementById('recordCount').textContent = t('load_err');
         }
@@ -542,7 +538,7 @@
 
         if (slice.length === 0) {
             const emptyHTML = `<div class="empty-state"><div class="empty-state-icon">📭</div><p>${t('no_data')}</p></div>`;
-            document.getElementById('tableBody').innerHTML = `<tr><td colspan="11">${emptyHTML}</td></tr>`;
+            document.getElementById('tableBody').innerHTML = `<tr><td colspan="8">${emptyHTML}</td></tr>`;
             document.getElementById('cardList').innerHTML  = emptyHTML;
             document.getElementById('paginationBar').style.display = 'none';
             return;
@@ -555,7 +551,7 @@
             const typeBadge = row.typeDisplay === 'Production Qty' ? 'badge-prod'
                             : row.typeDisplay === 'Defect'         ? 'badge-defect'
                             : 'badge-man';
-            const createdAt = row.createdAt ? new Date(row.createdAt).toLocaleString(locale) : '—';
+            const createdAt = row.createdAt ? (function(s){ const d=s.replace('T',' ').substring(0,19); return d; })(row.createdAt) : '—';
             const prodDate  = row.productionDate
                 ? row.productionDate.substring(6,8) + '/' + row.productionDate.substring(4,6) + '/' + row.productionDate.substring(0,4)
                 : '—';
@@ -565,7 +561,6 @@
 
             return `
             <tr>
-                <td class="td-id">#${row.id}</td>
                 <td class="td-date">${prodDate}</td>
                 <td><span class="badge ${typeBadge}">${escHtml(row.typeDisplay ?? '—')}</span></td>
                 <td class="td-op" title="${escHtml(row.operation ?? '')}">${escHtml(row.operation ?? '—')}</td>
@@ -574,8 +569,6 @@
                 <td class="qty-before">${fmtNum(before)}</td>
                 <td class="qty-after">→ ${fmtNum(after)}</td>
                 <td class="td-date">${createdAt}</td>
-                <td class="td-ip">${escHtml(row.clientIp ?? '—')}</td>
-                <td class="td-note" title="${escHtml(row.note ?? '')}">${row.note ? escHtml(row.note) : '<span class="no-val">—</span>'}</td>
             </tr>`;
         }).join('');
 
@@ -584,7 +577,7 @@
             const typeBadge = row.typeDisplay === 'Production Qty' ? 'badge-prod'
                             : row.typeDisplay === 'Defect'         ? 'badge-defect'
                             : 'badge-man';
-            const createdAt = row.createdAt ? new Date(row.createdAt).toLocaleString(locale) : '—';
+            const createdAt = row.createdAt ? (function(s){ const d=s.replace('T',' ').substring(0,19); return d; })(row.createdAt) : '—';
             const prodDate  = row.productionDate
                 ? row.productionDate.substring(6,8) + '/' + row.productionDate.substring(4,6) + '/' + row.productionDate.substring(0,4)
                 : '—';
@@ -596,7 +589,6 @@
             <div class="data-card">
                 <div class="data-card-top">
                     <span class="data-card-op">${escHtml(row.operation ?? '—')}</span>
-                    <span class="data-card-id">#${row.id}</span>
                 </div>
                 <div class="data-card-body">
                     <div class="data-card-field">
@@ -623,7 +615,6 @@
                         <span class="data-card-label">${t('card_saved_at')}</span>
                         <span class="data-card-value" style="font-size:.78rem;color:var(--gray-500)">${createdAt}</span>
                     </div>
-                    ${row.note ? `<div class="data-card-field full"><span class="data-card-label">${t('card_note')}</span><span class="data-card-value">${escHtml(row.note)}</span></div>` : ''}
                 </div>
             </div>`;
         }).join('');
