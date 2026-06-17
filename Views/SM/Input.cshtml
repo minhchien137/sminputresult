@@ -749,33 +749,38 @@
         btn.textContent = t.saving;
 
         try {
-            const res    = await fetch(`${pathBase}/SM/SaveResult`, {
+            const res = await fetch(`${pathBase}/SM/SaveResult`, {
                 method:  'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body:    JSON.stringify({ typeValue: type, operation: op, timeSlot: time, quantity: qty })
             });
-            const result = await res.json();
+            let result;
+            const raw = await res.text();
+            try { result = JSON.parse(raw); }
+            catch { throw new Error(`Server ${res.status}: ${raw.substring(0, 200)}`); }
             closeModal();
 
             if (result.success) {
                 showToast(result.message, 'success');
                 const savedType = type;
-                // Reset operation, time, quantity — keep type
-                $('#operationSelect').val('').trigger('change');
+                const savedOp   = op;
+                // Reset time, quantity — keep type and operation
                 $('#timeSelect').val('').trigger('change');
                 document.getElementById('quantityInput').value = '';
                 _currentValues = null;
                 hideSummary();
                 document.getElementById('currentBadge').classList.add('hidden');
-                // Re-select saved type
+                // Re-select saved type then operation
                 $('#typeSelect').val(savedType).trigger('change');
+                $('#operationSelect').val(savedOp).trigger('change');
             } else {
                 showToast(result.message, 'error');
             }
         } catch (e) {
             closeModal();
+            console.error('SaveResult error:', e);
             const t2 = (typeof I18N !== 'undefined' && I18N[currentLang]) ? I18N[currentLang] : {};
-            showToast(t2.err_network || 'Network error.', 'error');
+            showToast((t2.err_network || 'Network error.') + ' — ' + e.message, 'error');
         } finally {
             btn.disabled    = false;
             btn.textContent = t.btn_confirm;

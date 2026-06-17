@@ -3,7 +3,7 @@ using SMInputProduction.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ✅ Tất cả services phải đăng ký TRƯỚC Build()
+
 builder.Services.AddControllersWithViews();
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -26,7 +26,7 @@ app.Use((context, next) =>
     return next();
 });
 
-app.UseHttpsRedirection();
+//app.UseHttpsRedirection();
 app.UseRouting();
 app.UseAuthorization();
 app.MapStaticAssets();

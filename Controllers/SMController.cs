@@ -36,15 +36,15 @@ namespace SMInputProduction.Controllers
         public async Task<IActionResult> SaveResult([FromBody] SaveResultDto dto)
         {
             if (dto == null)
-                return Json(new { success = false, message = "Dữ liệu không hợp lệ." });
+                return Json(new { success = false, message = "Invalid data." });
             if (string.IsNullOrWhiteSpace(dto.TypeValue))
-                return Json(new { success = false, message = "Vui lòng chọn Type." });
+                return Json(new { success = false, message = "Please select a Type." });
             if (string.IsNullOrWhiteSpace(dto.Operation))
-                return Json(new { success = false, message = "Vui lòng chọn Operation." });
+                return Json(new { success = false, message = "Please select an Operation." });
             if (string.IsNullOrWhiteSpace(dto.TimeSlot))
-                return Json(new { success = false, message = "Vui lòng chọn Time." });
+                return Json(new { success = false, message = "Please select a Time slot." });
             if (dto.Quantity == null || dto.Quantity < 0)
-                return Json(new { success = false, message = "Quantity không được âm." });
+                return Json(new { success = false, message = "Quantity cannot be negative." });
 
             try
             {
@@ -124,12 +124,12 @@ namespace SMInputProduction.Controllers
                 });
                 await _context.SaveChangesAsync();
 
-                return Json(new { success = true, message = "Lưu thành công!" });
+                return Json(new { success = true, message = "Saved successfully!" });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "SaveResult error");
-                return Json(new { success = false, message = $"Lỗi: {ex.Message}" });
+                return Json(new { success = false, message = $"Error: {ex.Message}" });
             }
         }
 
