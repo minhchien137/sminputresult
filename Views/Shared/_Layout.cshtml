@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - InputProduction</title>
+    <script type="importmap"></script>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/SMInputProduction.styles.css" asp-append-version="true" />
+    @await RenderSectionAsync("Head", required: false)
+    <style>
+        .lang-btn { background: none; border: none; padding: 2px 4px; cursor: pointer; transition: opacity .2s, transform .2s; line-height: 1; }
+        .lang-btn img { height: 20px; width: 30px; object-fit: cover; border-radius: 3px; display: block; opacity: .55; transition: opacity .2s; }
+        .lang-btn:hover img, .lang-btn.active-lang img { opacity: 1; }
+        .lang-btn.active-lang img { box-shadow: 0 0 0 2px #C8102E; }
+        #mainNavbar .nav-link { font-weight: 500; }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-light" id="mainNavbar"
+             style="background:#ffffff;box-shadow:0 2px 8px rgba(0,0,0,.1);padding:.35rem 1rem;border-bottom:1px solid #e5e7eb;">
+            <div class="container-fluid">
+                <a class="navbar-brand p-0" asp-area="" asp-controller="SM" asp-action="InputResult">
+                    <img src="~/images/sigmalogo.jpg" height="34" alt="Sigma"
+                         style="border-radius:4px;display:block;" />
+                </a>
+                <button class="navbar-toggler border-0" type="button"
+                        data-bs-toggle="collapse" data-bs-target="#mainNav"
+                        aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="mainNav">
+                    <ul class="navbar-nav me-auto mb-0">
+                        <li class="nav-item">
+                            <a class="nav-link" style="color:#374151;" asp-area="" asp-controller="SM"
+                               asp-action="InputResult" data-i18n="nav_input">Input</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" style="color:#374151;" asp-area="" asp-controller="SM"
+                               asp-action="InputHistory" data-i18n="nav_history">History</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" style="color:#374151;" asp-area="" asp-controller="SM"
+                               asp-action="Report" data-i18n="nav_report">Report</a>
+                        </li>
+                    </ul>
+                    <div class="d-flex align-items-center gap-2 py-2 py-sm-0 ms-auto">
+                        <button class="lang-btn" id="btnLangEn" onclick="setLang('en')" title="English">
+                            <img src="~/images/en.png" alt="EN" id="flagEn" />
+                        </button>
+                        <button class="lang-btn" id="btnLangCn" onclick="setLang('cn')" title="中文">
+                            <img src="~/images/cn.png" alt="CN" id="flagCn" />
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+    <main role="main">
+        @RenderBody()
+    </main>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script>
+        /* ── i18n ──────────────────────────────────────────────────────────── */
+        const I18N = {
+            en: {
+                nav_input: 'Input', nav_history: 'History', nav_report: 'Report',
+                // Input page
+                page_title_input: 'Input Result',
+                page_subtitle_input: 'Enter production results by time slot',
+                form_header: 'Production Entry Form',
+                form_subheader: 'Select type, operation, time slot and enter quantity',
+                label_type: 'Type', label_operation: 'Operation',
+                label_time: 'Time', label_quantity: 'Quantity',
+                placeholder_type: '-- Select Type --',
+                placeholder_operation: '-- Select Operation --',
+                placeholder_time: '-- Select Time --',
+                placeholder_qty: 'Enter quantity...',
+                hint_qty: 'Enter non-negative integer',
+                summary_title: '📊 Today\'s Totals',
+                btn_reset: '🔄 Reset', btn_save: '💾 Save',
+                modal_title: 'Confirm Save',
+                modal_sub: 'Check information before saving.',
+                modal_type: 'Type', modal_op: 'Operation',
+                modal_time: 'Time Slot', modal_add: 'Add',
+                modal_total: 'Total after save',
+                btn_cancel: '✖ Cancel', btn_confirm: '✔ Confirm',
+                saving: '⏳ Saving...',
+                badge_current: 'Current',
+                badge_suffix: '→ will be added',
+                err_type: 'Please select Type',
+                err_op: 'Please select Operation',
+                err_time: 'Please select Time',
+                err_qty: 'Quantity must not be negative or empty',
+                err_network: 'Network error. Please try again.',
+                // History page
+                page_title_history: 'Input Result History',
+                page_subtitle_history: 'History of each production data entry',
+                filter_title: '🔍 Search Filters',
+                lbl_date_from: 'From Date', lbl_date_to: 'To Date',
+                ph_all: '-- All --',
+                btn_search: '🔍 Search', btn_clear: '✖ Clear',
+                tbl_title: '📊 Entry History',
+                tbl_id: '#ID', tbl_date: 'Prod Date', tbl_type: 'Type',
+                tbl_op: 'Operation', tbl_time: 'Time Slot',
+                tbl_added: 'Added', tbl_before: 'Before', tbl_after: 'After',
+                tbl_saved: 'Saved At', tbl_ip: 'IP', tbl_note: 'Note',
+                show_lbl: 'Show',
+                loading: 'Loading...', no_data: 'No data found',
+                load_err: 'Error loading data',
+                pg_showing: 'Showing', pg_records: 'records', pg_page: 'Page',
+                card_date: 'Prod Date', card_type: 'Type', card_time_slot: 'Time Slot',
+                card_qty: 'Quantity', card_before_after: 'Before → After',
+                card_saved_at: 'Saved At', card_note: 'Note',
+                // Report page
+                rpt_title: 'Production Report', rpt_subtitle: 'Real-time production dashboard',
+                rpt_refresh: 'Refresh', rpt_date: 'Date', rpt_operations: 'Operations',
+                rpt_all_ops: 'All Operations', rpt_select_all: 'All', rpt_select_none: 'None',
+                rpt_ops_selected: 'selected', rpt_apply: 'Apply',
+                rpt_kpi_achieve: 'Achievement', rpt_kpi_defect: 'Defect Rate',
+                rpt_kpi_uph: 'UPH', rpt_kpi_labor: 'Labor',
+                rpt_on_target: 'On Target', rpt_warning: 'Warning', rpt_below: 'Below Target',
+                rpt_actual: 'Actual', rpt_target: 'Target',
+                rpt_chart_title: '📈 Hourly Production',
+                rpt_tbl_title: '📋 Per-Operation Summary',
+                rpt_tbl_op: 'Operation', rpt_tbl_plan: 'Daily Plan',
+                rpt_tbl_actual: 'Actual', rpt_tbl_achieve: 'Achieve %',
+                rpt_tbl_ng: 'NG Qty', rpt_tbl_defect: 'Defect %',
+                rpt_tbl_labor: 'Labor (A/T)', rpt_tbl_uph: 'UPH (A/T)',
+                rpt_loading: 'Loading report...', rpt_no_data: 'No data for selected filters',
+                rpt_error: 'Error', rpt_updated: 'Updated',
+            },
+            cn: {
+                nav_input: '输入', nav_history: '历史', nav_report: '报表',
+                // Input page
+                page_title_input: '输入结果',
+                page_subtitle_input: '按时间段输入生产结果',
+                form_header: '生产录入表单',
+                form_subheader: '选择类型、工序、时间段并输入数量',
+                label_type: '类型', label_operation: '工序',
+                label_time: '时间', label_quantity: '数量',
+                placeholder_type: '-- 选择类型 --',
+                placeholder_operation: '-- 选择工序 --',
+                placeholder_time: '-- 选择时间 --',
+                placeholder_qty: '输入数量...',
+                hint_qty: '输入非负整数',
+                summary_title: '📊 今日汇总',
+                btn_reset: '🔄 重置', btn_save: '💾 保存',
+                modal_title: '确认保存',
+                modal_sub: '保存前请检查信息。',
+                modal_type: '类型', modal_op: '工序',
+                modal_time: '时间段', modal_add: '新增',
+                modal_total: '保存后合计',
+                btn_cancel: '✖ 取消', btn_confirm: '✔ 确认',
+                saving: '⏳ 保存中...',
+                badge_current: '当前',
+                badge_suffix: '→ 将被添加',
+                err_type: '请选择类型',
+                err_op: '请选择工序',
+                err_time: '请选择时间',
+                err_qty: '数量不能为负或为空',
+                err_network: '网络错误，请重试。',
+                // History page
+                page_title_history: '输入结果历史',
+                page_subtitle_history: '每次生产数据录入历史',
+                filter_title: '🔍 搜索过滤',
+                lbl_date_from: '开始日期', lbl_date_to: '结束日期',
+                ph_all: '-- 全部 --',
+                btn_search: '🔍 搜索', btn_clear: '✖ 清除',
+                tbl_title: '📊 录入历史',
+                tbl_id: '#ID', tbl_date: '生产日期', tbl_type: '类型',
+                tbl_op: '工序', tbl_time: '时间段',
+                tbl_added: '新增', tbl_before: '之前', tbl_after: '之后',
+                tbl_saved: '保存时间', tbl_ip: 'IP', tbl_note: '备注',
+                show_lbl: '显示',
+                loading: '加载中...', no_data: '未找到数据',
+                load_err: '加载数据出错',
+                pg_showing: '显示', pg_records: '条记录', pg_page: '第',
+                card_date: '生产日期', card_type: '类型', card_time_slot: '时间段',
+                card_qty: '数量', card_before_after: '之前 → 之后',
+                card_saved_at: '保存时间', card_note: '备注',
+                // Report page
+                rpt_title: '生产报表', rpt_subtitle: '实时生产看板',
+                rpt_refresh: '刷新', rpt_date: '日期', rpt_operations: '工序',
+                rpt_all_ops: '全部工序', rpt_select_all: '全选', rpt_select_none: '清空',
+                rpt_ops_selected: '已选', rpt_apply: '应用',
+                rpt_kpi_achieve: '达成率', rpt_kpi_defect: '不良率',
+                rpt_kpi_uph: '每小时产量', rpt_kpi_labor: '人力',
+                rpt_on_target: '达标', rpt_warning: '预警', rpt_below: '未达标',
+                rpt_actual: '实际', rpt_target: '目标',
+                rpt_chart_title: '📈 逐小时产量',
+                rpt_tbl_title: '📋 各工序汇总',
+                rpt_tbl_op: '工序', rpt_tbl_plan: '日计划',
+                rpt_tbl_actual: '实际', rpt_tbl_achieve: '达成率',
+                rpt_tbl_ng: 'NG数量', rpt_tbl_defect: '不良率',
+                rpt_tbl_labor: '人力（实/目）', rpt_tbl_uph: 'UPH（实/目）',
+                rpt_loading: '报表加载中...', rpt_no_data: '所选条件无数据',
+                rpt_error: '错误', rpt_updated: '更新时间',
+            }
+        };
+
+        let currentLang = localStorage.getItem('smLang') || 'en';
+
+        function applyLang(lang) {
+            currentLang = lang;
+            localStorage.setItem('smLang', lang);
+            document.documentElement.lang = (lang === 'cn') ? 'zh' : 'en';
+            const t = I18N[lang] || I18N.en;
+            document.querySelectorAll('[data-i18n]').forEach(function (el) {
+                const k = el.getAttribute('data-i18n');
+                if (t[k] !== undefined) el.textContent = t[k];
+            });
+            document.querySelectorAll('[data-i18n-ph]').forEach(function (el) {
+                const k = el.getAttribute('data-i18n-ph');
+                if (t[k] !== undefined) el.placeholder = t[k];
+            });
+            var btnEn = document.getElementById('btnLangEn');
+            var btnCn = document.getElementById('btnLangCn');
+            if (btnEn) btnEn.classList.toggle('active-lang', lang === 'en');
+            if (btnCn) btnCn.classList.toggle('active-lang', lang === 'cn');
+            document.dispatchEvent(new CustomEvent('langChanged', { detail: lang }));
+        }
+
+        function setLang(lang) { applyLang(lang); }
+
+        document.addEventListener('DOMContentLoaded', function () { applyLang(currentLang); });
+    </script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

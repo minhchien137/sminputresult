@@ -1,0 +1,774 @@
+@{
+    ViewData["Title"] = "Production Report";
+}
+
+@section Head {
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Barlow:wght@600;700;800&display=swap" rel="stylesheet" />
+<style>
+    :root {
+        --red:        #C8102E;
+        --red-dark:   #9B0B22;
+        --red-mid:    #E63950;
+        --red-light:  #FFE5E9;
+        --red-xlight: #FFF5F6;
+        --white:      #FFFFFF;
+        --gray-50:    #F9FAFB;
+        --gray-100:   #F3F4F6;
+        --gray-200:   #E5E7EB;
+        --gray-300:   #D1D5DB;
+        --gray-400:   #9CA3AF;
+        --gray-500:   #6B7280;
+        --gray-600:   #4B5563;
+        --gray-700:   #374151;
+        --gray-900:   #111827;
+        --green:      #059669;
+        --green-bg:   #ECFDF5;
+        --green-lt:   #D1FAE5;
+        --amber:      #D97706;
+        --amber-bg:   #FFFBEB;
+        --amber-lt:   #FEF3C7;
+        --danger:     #DC2626;
+        --shadow-sm:  0 1px 3px rgba(0,0,0,0.07);
+        --shadow-md:  0 4px 16px rgba(0,0,0,0.09);
+        --shadow-lg:  0 8px 32px rgba(0,0,0,0.12);
+    }
+
+    body {
+        font-family: 'Inter', sans-serif;
+        background: var(--gray-50);
+        min-height: 100vh;
+    }
+
+    /* ── PAGE ── */
+    .rpt-page { max-width: 1440px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
+    @@media (min-width: 768px) { .rpt-page { padding: 2rem 1.5rem 3rem; } }
+
+    /* ── PAGE HEADER ── */
+    .rpt-header { margin-bottom: 1.5rem; display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+    .rpt-header-left h1 { font-family:'Barlow',sans-serif; font-size:1.65rem; font-weight:800; color:var(--red-dark); margin:0; }
+    .rpt-header-left p  { color:var(--gray-500); font-size:0.85rem; margin-top:4px; }
+    .rpt-header-right   { display:flex; align-items:center; gap:10px; }
+    .last-updated { font-size:0.75rem; color:var(--gray-400); font-weight:500; }
+    .btn-refresh {
+        display:inline-flex; align-items:center; gap:5px;
+        padding:0.5rem 1rem; border-radius:8px;
+        background:var(--white); border:1.5px solid var(--gray-200);
+        color:var(--gray-600); font-family:'Inter',sans-serif;
+        font-size:0.82rem; font-weight:600; cursor:pointer;
+        transition:all .2s;
+    }
+    .btn-refresh:hover { border-color:var(--red); color:var(--red); background:var(--red-xlight); }
+
+    /* ── FILTER BAR ── */
+    .filter-bar {
+        background:var(--white);
+        border-radius:14px;
+        border:1px solid rgba(200,16,46,0.08);
+        box-shadow:var(--shadow-sm);
+        padding:1rem 1.25rem;
+        margin-bottom:1.5rem;
+        display:flex; flex-wrap:wrap; gap:1rem; align-items:flex-end;
+    }
+    .fb-group { display:flex; flex-direction:column; gap:5px; }
+    .fb-group label { font-size:0.72rem; font-weight:700; color:var(--gray-600); text-transform:uppercase; letter-spacing:.4px; }
+    .fb-group input[type="date"] {
+        padding:.55rem .85rem; border:1.5px solid var(--gray-200); border-radius:8px;
+        font-family:'Inter',sans-serif; font-size:0.88rem; color:var(--gray-900);
+        background:var(--white); outline:none; min-height:40px; cursor:pointer;
+        transition:border-color .2s;
+    }
+    .fb-group input[type="date"]:focus { border-color:var(--red); box-shadow:0 0 0 3px rgba(200,16,46,0.1); }
+    .ops-dropdown-wrap { position:relative; }
+    .ops-toggle-btn {
+        display:inline-flex; align-items:center; gap:8px;
+        padding:.55rem 1rem; border:1.5px solid var(--gray-200); border-radius:8px;
+        background:var(--white); font-family:'Inter',sans-serif; font-size:0.88rem;
+        color:var(--gray-900); cursor:pointer; min-height:40px; min-width:180px;
+        transition:border-color .2s; justify-content:space-between;
+    }
+    .ops-toggle-btn:hover { border-color:var(--red); }
+    .ops-toggle-btn.open { border-color:var(--red); box-shadow:0 0 0 3px rgba(200,16,46,0.1); }
+    .ops-panel {
+        display:none; position:absolute; top:calc(100% + 6px); left:0; z-index:200;
+        background:var(--white); border:1.5px solid var(--red-light);
+        border-radius:12px; box-shadow:var(--shadow-lg);
+        min-width:260px; max-width:380px; overflow:hidden;
+    }
+    .ops-panel.open { display:block; }
+    .ops-panel-head {
+        padding:.6rem 1rem; background:var(--red-xlight); border-bottom:1px solid var(--red-light);
+        display:flex; align-items:center; justify-content:space-between;
+    }
+    .ops-panel-head span { font-size:.78rem; font-weight:700; color:var(--red-dark); }
+    .ops-panel-actions { display:flex; gap:6px; }
+    .ops-act-btn {
+        padding:3px 10px; border-radius:5px; font-size:.75rem; font-weight:600;
+        cursor:pointer; border:1.5px solid var(--gray-200); background:var(--white);
+        color:var(--gray-600); transition:all .15s;
+    }
+    .ops-act-btn:hover { border-color:var(--red); color:var(--red); }
+    .ops-list { max-height:220px; overflow-y:auto; padding:.5rem 0; }
+    .ops-item {
+        display:flex; align-items:center; gap:10px;
+        padding:.45rem 1rem; cursor:pointer; transition:background .15s;
+        font-size:.85rem; color:var(--gray-700);
+    }
+    .ops-item:hover { background:var(--red-xlight); }
+    .ops-item input[type="checkbox"] { accent-color:var(--red); width:15px; height:15px; cursor:pointer; }
+    .fb-apply-btn {
+        padding:.55rem 1.4rem; border-radius:8px; min-height:40px;
+        background:linear-gradient(135deg,var(--red-dark) 0%,var(--red-mid) 100%);
+        color:var(--white); border:none; font-family:'Inter',sans-serif;
+        font-size:.88rem; font-weight:600; cursor:pointer;
+        box-shadow:0 3px 10px rgba(200,16,46,.28); transition:all .2s;
+    }
+    .fb-apply-btn:hover { transform:translateY(-1px); box-shadow:0 5px 16px rgba(200,16,46,.38); }
+
+    /* ── KPI GRID ── */
+    .kpi-grid {
+        display:grid;
+        grid-template-columns:repeat(2,1fr);
+        gap:1rem;
+        margin-bottom:1.5rem;
+    }
+    @@media (min-width:768px) { .kpi-grid { grid-template-columns:repeat(4,1fr); } }
+
+    .kpi-card {
+        background:var(--white); border-radius:16px;
+        border:1.5px solid var(--gray-200);
+        box-shadow:var(--shadow-sm);
+        padding:1.2rem 1.25rem;
+        position:relative; overflow:hidden;
+        transition:box-shadow .2s, transform .2s;
+    }
+    .kpi-card:hover { box-shadow:var(--shadow-md); transform:translateY(-2px); }
+    .kpi-card::before {
+        content:''; position:absolute; top:0; left:0; right:0; height:3px;
+        background:var(--gray-200); border-radius:16px 16px 0 0;
+    }
+    .kpi-card.good::before  { background:linear-gradient(90deg,var(--green),#34d399); }
+    .kpi-card.warn::before  { background:linear-gradient(90deg,var(--amber),#fbbf24); }
+    .kpi-card.bad::before   { background:linear-gradient(90deg,var(--red-dark),var(--red-mid)); }
+
+    .kpi-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:.75rem; }
+    .kpi-icon {
+        width:36px; height:36px; border-radius:10px;
+        display:flex; align-items:center; justify-content:center;
+        font-size:1.1rem; flex-shrink:0;
+        background:var(--gray-100);
+    }
+    .kpi-card.good .kpi-icon { background:var(--green-bg); }
+    .kpi-card.warn .kpi-icon { background:var(--amber-bg); }
+    .kpi-card.bad  .kpi-icon { background:var(--red-xlight); }
+
+    .kpi-status-badge {
+        font-size:.65rem; font-weight:700; padding:2px 8px; border-radius:20px;
+        background:var(--gray-100); color:var(--gray-500);
+        text-transform:uppercase; letter-spacing:.4px;
+    }
+    .kpi-card.good .kpi-status-badge { background:var(--green-lt); color:var(--green); }
+    .kpi-card.warn .kpi-status-badge { background:var(--amber-lt); color:var(--amber); }
+    .kpi-card.bad  .kpi-status-badge { background:var(--red-light); color:var(--red-dark); }
+
+    .kpi-label { font-size:.72rem; font-weight:700; color:var(--gray-500); text-transform:uppercase; letter-spacing:.4px; }
+    .kpi-value { font-family:'Barlow',sans-serif; font-size:2rem; font-weight:800; color:var(--gray-900); line-height:1.1; margin:.25rem 0; }
+    @@media (min-width:768px) { .kpi-value { font-size:2.3rem; } }
+    .kpi-card.good .kpi-value { color:var(--green); }
+    .kpi-card.warn .kpi-value { color:var(--amber); }
+    .kpi-card.bad  .kpi-value { color:var(--danger); }
+
+    .kpi-progress { height:5px; background:var(--gray-100); border-radius:3px; margin:.5rem 0 .4rem; overflow:hidden; }
+    .kpi-progress-fill { height:100%; border-radius:3px; width:0%; transition:width .7s cubic-bezier(.34,1,.64,1); background:var(--gray-300); }
+    .kpi-card.good .kpi-progress-fill { background:linear-gradient(90deg,var(--green),#34d399); }
+    .kpi-card.warn .kpi-progress-fill { background:linear-gradient(90deg,var(--amber),#fbbf24); }
+    .kpi-card.bad  .kpi-progress-fill { background:linear-gradient(90deg,var(--red-dark),var(--red-mid)); }
+
+    .kpi-sub { font-size:.75rem; color:var(--gray-400); font-weight:500; }
+
+    /* ── CHART CARD ── */
+    .chart-card {
+        background:var(--white); border-radius:16px;
+        border:1px solid rgba(200,16,46,0.07);
+        box-shadow:var(--shadow-sm); overflow:hidden;
+        margin-bottom:1.5rem;
+    }
+    .section-header {
+        padding:.9rem 1.25rem; border-bottom:1px solid var(--gray-100);
+        display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;
+    }
+    .section-title { font-family:'Barlow',sans-serif; font-size:.95rem; font-weight:700; color:var(--red-dark); margin:0; }
+    .chart-legend { display:flex; gap:14px; flex-wrap:wrap; }
+    .legend-item { display:flex; align-items:center; gap:5px; font-size:.75rem; color:var(--gray-600); font-weight:500; }
+    .legend-dot { width:10px; height:10px; border-radius:2px; }
+    .legend-dot.actual  { background:rgba(200,16,46,0.85); }
+    .legend-dot.ng      { background:rgba(217,119,6,0.8); }
+    .legend-dot.target  { background:#374151; border-radius:50%; }
+    .chart-body { padding:1.25rem; overflow-x:auto; -webkit-overflow-scrolling:touch; }
+    .chart-wrap { position:relative; min-width:360px; }
+
+    /* ── TABLE CARD ── */
+    .table-card {
+        background:var(--white); border-radius:16px;
+        border:1px solid rgba(200,16,46,0.07);
+        box-shadow:var(--shadow-sm); overflow:hidden;
+    }
+    .table-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+    table.rpt-table { width:100%; border-collapse:collapse; font-size:.85rem; min-width:680px; }
+    table.rpt-table thead { background:linear-gradient(135deg,var(--red-dark) 0%,var(--red-mid) 100%); }
+    table.rpt-table thead th {
+        padding:.8rem 1rem; text-align:left;
+        font-family:'Barlow',sans-serif; font-size:.71rem; font-weight:700;
+        color:rgba(255,255,255,0.9); letter-spacing:.5px; text-transform:uppercase; white-space:nowrap;
+    }
+    table.rpt-table thead th:first-child { border-radius:0; }
+    table.rpt-table tbody tr { border-bottom:1px solid var(--gray-100); transition:background .15s; }
+    table.rpt-table tbody tr:hover { background:var(--red-xlight); }
+    table.rpt-table tbody tr:last-child { border-bottom:none; }
+    table.rpt-table tbody td { padding:.75rem 1rem; color:var(--gray-700); vertical-align:middle; }
+    .td-op { font-weight:600; color:var(--gray-900); white-space:nowrap; }
+    .td-num { font-weight:600; text-align:right; white-space:nowrap; }
+    .td-right { text-align:right; }
+
+    /* Progress bar in table */
+    .achieve-cell { min-width:130px; }
+    .achieve-bar-wrap { display:flex; align-items:center; gap:8px; }
+    .achieve-bar { flex:1; height:7px; background:var(--gray-100); border-radius:4px; overflow:hidden; }
+    .achieve-bar-fill { height:100%; border-radius:4px; transition:width .6s cubic-bezier(.34,1,.64,1); }
+    .achieve-pct { font-size:.8rem; font-weight:700; white-space:nowrap; min-width:42px; text-align:right; }
+    .achieve-good .achieve-bar-fill { background:linear-gradient(90deg,var(--green),#34d399); }
+    .achieve-good .achieve-pct { color:var(--green); }
+    .achieve-warn .achieve-bar-fill { background:linear-gradient(90deg,var(--amber),#fbbf24); }
+    .achieve-warn .achieve-pct { color:var(--amber); }
+    .achieve-bad  .achieve-bar-fill { background:linear-gradient(90deg,var(--red-dark),var(--red-mid)); }
+    .achieve-bad  .achieve-pct { color:var(--danger); }
+
+    /* Defect badge */
+    .defect-badge {
+        display:inline-block; padding:2px 8px; border-radius:20px;
+        font-size:.74rem; font-weight:700; white-space:nowrap;
+    }
+    .defect-good { background:var(--green-lt); color:var(--green); }
+    .defect-warn { background:var(--amber-lt); color:var(--amber); }
+    .defect-bad  { background:var(--red-light); color:var(--red-dark); }
+
+    /* Labor cell */
+    .labor-ratio { font-size:.82rem; font-weight:600; }
+    .labor-ok   { color:var(--green); }
+    .labor-warn { color:var(--amber); }
+    .labor-bad  { color:var(--danger); }
+
+    /* ── MOBILE CARDS ── */
+    .mobile-cards { display:none; }
+    @@media (max-width:700px) {
+        table.rpt-table { display:none; }
+        .mobile-cards { display:block; }
+    }
+    .mob-card { border-bottom:1px solid var(--gray-100); padding:1rem 1.25rem; transition:background .15s; }
+    .mob-card:last-child { border-bottom:none; }
+    .mob-card:hover { background:var(--red-xlight); }
+    .mob-card-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:.65rem; }
+    .mob-op  { font-weight:700; color:var(--red-dark); font-size:.92rem; }
+    .mob-grid { display:grid; grid-template-columns:1fr 1fr; gap:.35rem .75rem; }
+    .mob-field { display:flex; flex-direction:column; gap:2px; }
+    .mob-lbl { font-size:.66rem; font-weight:700; text-transform:uppercase; color:var(--gray-400); letter-spacing:.3px; }
+    .mob-val { font-size:.85rem; color:var(--gray-700); font-weight:500; }
+    .mob-full { grid-column:1/-1; }
+
+    /* ── EMPTY / LOADING ── */
+    .state-box { text-align:center; padding:3rem 1.5rem; color:var(--gray-400); }
+    .state-icon { font-size:2.5rem; margin-bottom:.75rem; opacity:.5; }
+    .state-text { font-size:.9rem; }
+    .spinner {
+        width:32px; height:32px;
+        border:3px solid var(--red-light); border-top-color:var(--red);
+        border-radius:50%; animation:spin .8s linear infinite;
+        margin:0 auto .9rem;
+    }
+    @@keyframes spin { to { transform:rotate(360deg); } }
+
+    /* ── SKELETON PULSE ── */
+    .skeleton { background:linear-gradient(90deg,var(--gray-100) 25%,var(--gray-200) 50%,var(--gray-100) 75%); background-size:200% 100%; animation:shimmer 1.5s infinite; border-radius:8px; }
+    @@keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+</style>
+}
+
+<div class="rpt-page">
+
+    <!-- PAGE HEADER -->
+    <div class="rpt-header">
+        <div class="rpt-header-left">
+            <h1 data-i18n="rpt_title">Production Report</h1>
+            <p data-i18n="rpt_subtitle">Real-time production dashboard</p>
+        </div>
+        <div class="rpt-header-right">
+            <span class="last-updated" id="lastUpdated"></span>
+            <button class="btn-refresh" onclick="loadReport()">⟳ <span data-i18n="rpt_refresh">Refresh</span></button>
+        </div>
+    </div>
+
+    <!-- FILTER BAR -->
+    <div class="filter-bar">
+        <div class="fb-group">
+            <label data-i18n="rpt_date">Date</label>
+            <input type="date" id="dateFilter" onchange="loadReport()" />
+        </div>
+
+        <div class="fb-group">
+            <label data-i18n="rpt_operations">Operations</label>
+            <div class="ops-dropdown-wrap">
+                <button class="ops-toggle-btn" id="opsToggleBtn" onclick="toggleOpsPanel()">
+                    <span id="opsLabel" data-i18n="rpt_all_ops">All Operations</span>
+                    <span style="font-size:.7rem;opacity:.6;">▼</span>
+                </button>
+                <div class="ops-panel" id="opsPanel">
+                    <div class="ops-panel-head">
+                        <span data-i18n="rpt_operations">Operations</span>
+                        <div class="ops-panel-actions">
+                            <button class="ops-act-btn" onclick="selectAllOps()" data-i18n="rpt_select_all">All</button>
+                            <button class="ops-act-btn" onclick="clearAllOps()" data-i18n="rpt_select_none">None</button>
+                        </div>
+                    </div>
+                    <div class="ops-list" id="opsList"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="fb-group" style="justify-content:flex-end;">
+            <label style="visibility:hidden">‎</label>
+            <button class="fb-apply-btn" onclick="loadReport()" data-i18n="rpt_apply">Apply</button>
+        </div>
+    </div>
+
+    <!-- KPI CARDS -->
+    <div class="kpi-grid">
+        <div class="kpi-card" id="kpiAchieve">
+            <div class="kpi-top">
+                <div class="kpi-icon">🎯</div>
+                <span class="kpi-status-badge" id="kpiAchieveStatus">—</span>
+            </div>
+            <div class="kpi-label" data-i18n="rpt_kpi_achieve">Achievement</div>
+            <div class="kpi-value" id="kpiAchieveVal">—</div>
+            <div class="kpi-progress"><div class="kpi-progress-fill" id="kpiAchieveBar"></div></div>
+            <div class="kpi-sub" id="kpiAchieveSub">—</div>
+        </div>
+
+        <div class="kpi-card" id="kpiDefect">
+            <div class="kpi-top">
+                <div class="kpi-icon">⚠️</div>
+                <span class="kpi-status-badge" id="kpiDefectStatus">—</span>
+            </div>
+            <div class="kpi-label" data-i18n="rpt_kpi_defect">Defect Rate</div>
+            <div class="kpi-value" id="kpiDefectVal">—</div>
+            <div class="kpi-progress"><div class="kpi-progress-fill" id="kpiDefectBar"></div></div>
+            <div class="kpi-sub" id="kpiDefectSub">—</div>
+        </div>
+
+        <div class="kpi-card" id="kpiUPH">
+            <div class="kpi-top">
+                <div class="kpi-icon">⚡</div>
+                <span class="kpi-status-badge" id="kpiUPHStatus">—</span>
+            </div>
+            <div class="kpi-label" data-i18n="rpt_kpi_uph">UPH</div>
+            <div class="kpi-value" id="kpiUPHVal">—</div>
+            <div class="kpi-progress"><div class="kpi-progress-fill" id="kpiUPHBar"></div></div>
+            <div class="kpi-sub" id="kpiUPHSub">—</div>
+        </div>
+
+        <div class="kpi-card" id="kpiLabor">
+            <div class="kpi-top">
+                <div class="kpi-icon">👥</div>
+                <span class="kpi-status-badge" id="kpiLaborStatus">—</span>
+            </div>
+            <div class="kpi-label" data-i18n="rpt_kpi_labor">Labor</div>
+            <div class="kpi-value" id="kpiLaborVal">—</div>
+            <div class="kpi-progress"><div class="kpi-progress-fill" id="kpiLaborBar"></div></div>
+            <div class="kpi-sub" id="kpiLaborSub">—</div>
+        </div>
+    </div>
+
+    <!-- HOURLY CHART -->
+    <div class="chart-card">
+        <div class="section-header">
+            <h3 class="section-title" data-i18n="rpt_chart_title">📈 Hourly Production</h3>
+            <div class="chart-legend">
+                <div class="legend-item"><div class="legend-dot actual"></div><span data-i18n="rpt_actual">Actual</span></div>
+                <div class="legend-item"><div class="legend-dot ng"></div>NG</div>
+                <div class="legend-item"><div class="legend-dot target" style="width:18px;height:3px;border-radius:2px;background:#374151;"></div><span data-i18n="rpt_target">Target</span></div>
+            </div>
+        </div>
+        <div class="chart-body">
+            <div class="chart-wrap">
+                <canvas id="hourlyChart" height="280"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- PER-OPERATION TABLE -->
+    <div class="table-card">
+        <div class="section-header">
+            <h3 class="section-title" data-i18n="rpt_tbl_title">📋 Per-Operation Summary</h3>
+            <span id="opCount" style="font-size:.78rem;color:var(--gray-400);"></span>
+        </div>
+
+        <!-- Desktop -->
+        <div class="table-wrap">
+            <table class="rpt-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th data-i18n="rpt_tbl_op">Operation</th>
+                        <th data-i18n="rpt_tbl_plan" class="td-right">Daily Plan</th>
+                        <th data-i18n="rpt_tbl_actual" class="td-right">Actual</th>
+                        <th data-i18n="rpt_tbl_achieve">Achieve %</th>
+                        <th data-i18n="rpt_tbl_ng" class="td-right">NG Qty</th>
+                        <th data-i18n="rpt_tbl_defect">Defect %</th>
+                        <th data-i18n="rpt_tbl_labor">Labor (A/T)</th>
+                        <th data-i18n="rpt_tbl_uph">UPH (A/T)</th>
+                    </tr>
+                </thead>
+                <tbody id="opTableBody">
+                    <tr><td colspan="9">
+                        <div class="state-box"><div class="spinner"></div><p class="state-text" data-i18n="rpt_loading">Loading report...</p></div>
+                    </td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Mobile cards -->
+        <div class="mobile-cards" id="opMobileCards">
+            <div class="state-box"><div class="spinner"></div></div>
+        </div>
+    </div>
+
+</div>
+
+@section Scripts {
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script>
+    const pathBase = '@Context.Request.PathBase'.replace(/\/$/, '');
+    let reportData    = null;
+    let hourlyChart   = null;
+    let allOpsAvail   = [];
+    let selectedOps   = new Set();
+    let opsInitialized = false;
+
+    // ── i18n helper ───────────────────────────────────────────────────────────
+    function tr(key, fallback) {
+        try { return I18N[currentLang][key] || fallback || key; } catch { return fallback || key; }
+    }
+
+    // ── Status helpers ────────────────────────────────────────────────────────
+    function achStatus(pct) { return pct >= 90 ? 'good' : pct >= 70 ? 'warn' : 'bad'; }
+    function defStatus(pct) { return pct <= 2  ? 'good' : pct <= 5  ? 'warn' : 'bad'; }
+    function ratioStatus(actual, target) {
+        if (!target) return '';
+        const r = actual / target;
+        return r >= 0.9 ? 'good' : r >= 0.75 ? 'warn' : 'bad';
+    }
+    function statusLabel(s) {
+        const map = { good: tr('rpt_on_target','On Target'), warn: tr('rpt_warning','Warning'), bad: tr('rpt_below','Below Target'), '': '—' };
+        return map[s] || '—';
+    }
+
+    // ── Ops dropdown ──────────────────────────────────────────────────────────
+    function toggleOpsPanel() {
+        const panel = document.getElementById('opsPanel');
+        const btn   = document.getElementById('opsToggleBtn');
+        const open  = panel.classList.toggle('open');
+        btn.classList.toggle('open', open);
+    }
+    document.addEventListener('click', function (e) {
+        if (!e.target.closest('.ops-dropdown-wrap')) {
+            document.getElementById('opsPanel').classList.remove('open');
+            document.getElementById('opsToggleBtn').classList.remove('open');
+        }
+    });
+
+    function buildOpsPanel(ops) {
+        const list = document.getElementById('opsList');
+        list.innerHTML = ops.map(op => `
+            <label class="ops-item">
+                <input type="checkbox" value="${escH(op)}" ${selectedOps.has(op) ? 'checked' : ''}
+                       onchange="toggleOp('${escH(op)}', this.checked)" />
+                ${escH(op)}
+            </label>`).join('');
+        updateOpsLabel();
+    }
+
+    function toggleOp(op, checked) {
+        if (checked) selectedOps.add(op); else selectedOps.delete(op);
+        updateOpsLabel();
+    }
+
+    function selectAllOps() {
+        selectedOps = new Set(allOpsAvail);
+        document.querySelectorAll('#opsList input[type="checkbox"]').forEach(cb => cb.checked = true);
+        updateOpsLabel();
+    }
+
+    function clearAllOps() {
+        selectedOps.clear();
+        document.querySelectorAll('#opsList input[type="checkbox"]').forEach(cb => cb.checked = false);
+        updateOpsLabel();
+    }
+
+    function updateOpsLabel() {
+        const lbl = document.getElementById('opsLabel');
+        if (selectedOps.size === 0 || selectedOps.size === allOpsAvail.length) {
+            lbl.textContent = tr('rpt_all_ops', 'All Operations');
+        } else {
+            lbl.textContent = selectedOps.size + ' ' + tr('rpt_ops_selected', 'selected');
+        }
+    }
+
+    // ── Main load ─────────────────────────────────────────────────────────────
+    async function loadReport() {
+        const dateVal = document.getElementById('dateFilter').value;
+        const opsVal  = (selectedOps.size > 0 && selectedOps.size < allOpsAvail.length)
+                        ? [...selectedOps].join(',') : '';
+
+        setLoading(true);
+        try {
+            const url = `${pathBase}/SM/GetReportData?date=${encodeURIComponent(dateVal)}&ops=${encodeURIComponent(opsVal)}`;
+            const res = await fetch(url);
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            reportData = await res.json();
+
+            // First load: init op list
+            if (!opsInitialized) {
+                allOpsAvail = reportData.availableOps || [];
+                selectedOps = new Set(allOpsAvail);
+                buildOpsPanel(allOpsAvail);
+                opsInitialized = true;
+            }
+
+            renderKPIs(reportData.summary);
+            renderChart(reportData.operations);
+            renderTable(reportData.operations);
+
+            const now = new Date();
+            document.getElementById('lastUpdated').textContent =
+                tr('rpt_updated', 'Updated') + ': ' + now.toLocaleTimeString();
+        } catch (e) {
+            console.error('loadReport error:', e);
+            setErrorState(e.message);
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    function setLoading(on) {
+        // nothing to toggle globally; individual sections handle their own state
+    }
+
+    function setErrorState(msg) {
+        const errHTML = `<div class="state-box"><div class="state-icon">⚠️</div><p class="state-text">${tr('rpt_error','Error')}: ${escH(msg)}</p></div>`;
+        document.getElementById('opTableBody').innerHTML = `<tr><td colspan="9">${errHTML}</td></tr>`;
+        document.getElementById('opMobileCards').innerHTML = errHTML;
+    }
+
+    // ── KPI cards ─────────────────────────────────────────────────────────────
+    function renderKPIs(s) {
+        if (!s) return;
+        // Achievement
+        setKPI('kpiAchieve', {
+            value:  s.ovAchieve + '%',
+            sub:    fmt(s.totActual) + ' / ' + fmt(s.totTarget) + ' pcs',
+            pct:    s.ovAchieve,
+            status: achStatus(s.ovAchieve),
+        });
+        // Defect
+        setKPI('kpiDefect', {
+            value:  s.ovDefect + '%',
+            sub:    fmt(s.totNG) + ' NG pcs',
+            pct:    Math.min(s.ovDefect * 20, 100), // visual scale
+            status: defStatus(s.ovDefect),
+        });
+        // UPH
+        setKPI('kpiUPH', {
+            value:  fmt(s.avgAUPH),
+            sub:    tr('rpt_target','Target') + ': ' + fmt(s.avgTUPH),
+            pct:    s.avgTUPH > 0 ? Math.min(s.avgAUPH / s.avgTUPH * 100, 100) : 0,
+            status: ratioStatus(s.avgAUPH, s.avgTUPH),
+        });
+        // Labor
+        setKPI('kpiLabor', {
+            value:  fmt(s.totALabor),
+            sub:    tr('rpt_target','Target') + ': ' + fmt(s.totTLabor),
+            pct:    s.totTLabor > 0 ? Math.min(s.totALabor / s.totTLabor * 100, 100) : 0,
+            status: ratioStatus(s.totALabor, s.totTLabor),
+        });
+    }
+
+    function setKPI(id, opts) {
+        const card   = document.getElementById(id);
+        const status = opts.status || '';
+        card.className = 'kpi-card' + (status ? ' ' + status : '');
+        card.querySelector('.kpi-value').textContent         = opts.value;
+        card.querySelector('.kpi-sub').textContent           = opts.sub;
+        card.querySelector('.kpi-progress-fill').style.width = Math.min(opts.pct || 0, 100) + '%';
+        const badge = card.querySelector('.kpi-status-badge');
+        badge.textContent = statusLabel(status);
+    }
+
+    // ── Chart ─────────────────────────────────────────────────────────────────
+    function renderChart(ops) {
+        if (!ops || ops.length === 0) {
+            if (hourlyChart) { hourlyChart.destroy(); hourlyChart = null; }
+            return;
+        }
+        const labels  = ['T1', 'T2', 'T3', 'T4', 'T5', 'T6'];
+        const actual  = [0,0,0,0,0,0];
+        const ngArr   = [0,0,0,0,0,0];
+        const tgtArr  = [0,0,0,0,0,0];
+
+        ops.forEach(op => {
+            (op.hourlyData   || []).forEach((v, i) => { actual[i] += Number(v) || 0; });
+            (op.ngHourlyData || []).forEach((v, i) => { ngArr[i]  += Number(v) || 0; });
+            const slotTgt = Number(op.targetUPH) || (Number(op.targetQty) / 6) || 0;
+            for (let i = 0; i < 6; i++) tgtArr[i] += slotTgt;
+        });
+
+        const ctx = document.getElementById('hourlyChart').getContext('2d');
+        if (hourlyChart) hourlyChart.destroy();
+
+        hourlyChart = new Chart(ctx, {
+            data: {
+                labels,
+                datasets: [
+                    {
+                        type: 'bar', label: tr('rpt_actual','Actual'), data: actual,
+                        backgroundColor: 'rgba(200,16,46,0.82)',
+                        hoverBackgroundColor: 'rgba(155,11,34,0.9)',
+                        borderRadius: 5, borderSkipped: false, order: 2,
+                    },
+                    {
+                        type: 'bar', label: 'NG', data: ngArr,
+                        backgroundColor: 'rgba(217,119,6,0.75)',
+                        hoverBackgroundColor: 'rgba(180,83,9,0.9)',
+                        borderRadius: 5, borderSkipped: false, order: 3,
+                    },
+                    {
+                        type: 'line', label: tr('rpt_target','Target'), data: tgtArr,
+                        borderColor: '#374151', borderWidth: 2.5,
+                        borderDash: [6, 4],
+                        pointBackgroundColor: '#374151', pointRadius: 4, pointHoverRadius: 6,
+                        fill: false, tension: 0.1, order: 1,
+                    }
+                ]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                interaction: { mode: 'index', intersect: false },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: 'rgba(17,24,39,.92)',
+                        padding: 10, cornerRadius: 8,
+                        callbacks: {
+                            label: ctx => '  ' + ctx.dataset.label + ': ' + Number(ctx.parsed.y).toLocaleString()
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: 'rgba(0,0,0,0.04)' },
+                        ticks: { callback: v => Number(v).toLocaleString(), font: { size: 11 } }
+                    },
+                    x: {
+                        grid: { display: false },
+                        ticks: { font: { size: 12, weight: '600' } }
+                    }
+                },
+                animation: { duration: 600, easing: 'easeOutCubic' }
+            }
+        });
+    }
+
+    // ── Table ─────────────────────────────────────────────────────────────────
+    function renderTable(ops) {
+        const count = document.getElementById('opCount');
+        if (!ops || ops.length === 0) {
+            const emptyHTML = `<div class="state-box"><div class="state-icon">📭</div><p class="state-text">${tr('rpt_no_data','No data for selected filters')}</p></div>`;
+            document.getElementById('opTableBody').innerHTML = `<tr><td colspan="9">${emptyHTML}</td></tr>`;
+            document.getElementById('opMobileCards').innerHTML = emptyHTML;
+            if (count) count.textContent = '';
+            return;
+        }
+        if (count) count.textContent = ops.length + ' operations';
+
+        // Desktop rows
+        document.getElementById('opTableBody').innerHTML = ops.map((op, i) => {
+            const aStatus = achStatus(op.achieveRate);
+            const dClass  = defStatus(op.defectRate) === 'good' ? 'defect-good' : defStatus(op.defectRate) === 'warn' ? 'defect-warn' : 'defect-bad';
+            const lClass  = ratioStatus(op.actualLabor, op.targetLabor);
+            const lStyle  = lClass === 'good' ? 'labor-ok' : lClass === 'warn' ? 'labor-warn' : 'labor-bad';
+
+            return `<tr>
+                <td style="color:var(--gray-400);font-size:.76rem;font-weight:600;">${i+1}</td>
+                <td class="td-op">${escH(op.operation)}</td>
+                <td class="td-num">${fmt(op.targetQty)}</td>
+                <td class="td-num">${fmt(op.actualQty)}</td>
+                <td class="achieve-cell">
+                    <div class="achieve-bar-wrap achieve-${aStatus}">
+                        <div class="achieve-bar"><div class="achieve-bar-fill" style="width:${Math.min(op.achieveRate,100)}%"></div></div>
+                        <span class="achieve-pct">${op.achieveRate}%</span>
+                    </div>
+                </td>
+                <td class="td-num">${fmt(op.ngQty)}</td>
+                <td><span class="defect-badge ${dClass}">${op.defectRate}%</span></td>
+                <td><span class="labor-ratio ${lStyle}">${fmt(op.actualLabor)} / ${fmt(op.targetLabor)}</span></td>
+                <td style="font-size:.82rem;font-weight:600;color:var(--gray-700);">${fmt(op.actualUPH)} / ${fmt(op.targetUPH)}</td>
+            </tr>`;
+        }).join('');
+
+        // Mobile cards
+        document.getElementById('opMobileCards').innerHTML = ops.map(op => {
+            const aStatus = achStatus(op.achieveRate);
+            const dClass  = defStatus(op.defectRate) === 'good' ? 'defect-good' : defStatus(op.defectRate) === 'warn' ? 'defect-warn' : 'defect-bad';
+            const lClass  = ratioStatus(op.actualLabor, op.targetLabor);
+            const lStyle  = lClass === 'good' ? 'labor-ok' : lClass === 'warn' ? 'labor-warn' : 'labor-bad';
+
+            return `<div class="mob-card">
+                <div class="mob-card-top">
+                    <span class="mob-op">${escH(op.operation)}</span>
+                    <span class="achieve-pct achieve-${aStatus}">${op.achieveRate}%</span>
+                </div>
+                <div class="achieve-bar-wrap achieve-${aStatus}" style="margin-bottom:.75rem;">
+                    <div class="achieve-bar" style="height:6px;"><div class="achieve-bar-fill" style="width:${Math.min(op.achieveRate,100)}%"></div></div>
+                </div>
+                <div class="mob-grid">
+                    <div class="mob-field"><span class="mob-lbl">${tr('rpt_tbl_plan','Plan')}</span><span class="mob-val">${fmt(op.targetQty)}</span></div>
+                    <div class="mob-field"><span class="mob-lbl">${tr('rpt_tbl_actual','Actual')}</span><span class="mob-val">${fmt(op.actualQty)}</span></div>
+                    <div class="mob-field"><span class="mob-lbl">NG Qty</span><span class="mob-val">${fmt(op.ngQty)}</span></div>
+                    <div class="mob-field"><span class="mob-lbl">${tr('rpt_tbl_defect','Defect')}</span><span class="mob-val"><span class="defect-badge ${dClass}">${op.defectRate}%</span></span></div>
+                    <div class="mob-field"><span class="mob-lbl">${tr('rpt_tbl_labor','Labor')}</span><span class="mob-val ${lStyle}">${fmt(op.actualLabor)} / ${fmt(op.targetLabor)}</span></div>
+                    <div class="mob-field"><span class="mob-lbl">UPH</span><span class="mob-val">${fmt(op.actualUPH)} / ${fmt(op.targetUPH)}</span></div>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    // ── Helpers ───────────────────────────────────────────────────────────────
+    function fmt(v) { return Number(v || 0).toLocaleString(); }
+    function escH(s) {
+        return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    // ── lang changed ─────────────────────────────────────────────────────────
+    document.addEventListener('langChanged', function () {
+        if (reportData) {
+            renderKPIs(reportData.summary);
+            renderChart(reportData.operations);
+            renderTable(reportData.operations);
+        }
+    });
+
+    // ── Init ──────────────────────────────────────────────────────────────────
+    window.addEventListener('DOMContentLoaded', function () {
+        document.getElementById('dateFilter').value = new Date().toISOString().split('T')[0];
+        loadReport();
+    });
+</script>
+}

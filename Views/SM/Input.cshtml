@@ -1,0 +1,810 @@
+@{
+    ViewData["Title"] = "Input Result";
+    var operations = ViewBag.Operations as List<string> ?? new List<string>();
+}
+
+@section Head {
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Barlow:wght@600;700;800&display=swap" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-rc.0/css/select2.min.css" rel="stylesheet" />
+<style>
+    :root {
+        --red:        #C8102E;
+        --red-dark:   #9B0B22;
+        --red-mid:    #E63950;
+        --red-light:  #FFE5E9;
+        --red-xlight: #FFF5F6;
+        --white:      #FFFFFF;
+        --gray-50:    #F9FAFB;
+        --gray-100:   #F3F4F6;
+        --gray-200:   #E5E7EB;
+        --gray-400:   #9CA3AF;
+        --gray-500:   #6B7280;
+        --gray-700:   #374151;
+        --gray-900:   #111827;
+        --success:    #059669;
+        --danger:     #DC2626;
+        --shadow-sm:  0 1px 3px rgba(200,16,46,0.08);
+        --shadow-md:  0 4px 20px rgba(200,16,46,0.12);
+        --shadow-lg:  0 8px 40px rgba(200,16,46,0.18);
+    }
+
+    body {
+        font-family: 'Inter', sans-serif;
+        background: var(--gray-50);
+        min-height: 100vh;
+        background-image:
+            radial-gradient(ellipse at 10% 30%, rgba(200,16,46,0.05) 0%, transparent 55%),
+            radial-gradient(ellipse at 90% 70%, rgba(230,57,80,0.04) 0%, transparent 50%);
+    }
+
+    /* ── LAYOUT ── */
+    .page-wrapper {
+        max-width: 680px;
+        margin: 0 auto;
+        padding: 2rem 1rem 3rem;
+    }
+    @@media (min-width: 600px) { .page-wrapper { padding: 2.5rem 1.5rem 3rem; } }
+
+    /* ── PAGE HEADER ── */
+    .page-header { margin-bottom: 1.75rem; }
+    .page-header h1 {
+        font-family: 'Barlow', sans-serif;
+        font-size: 1.6rem;
+        font-weight: 800;
+        color: var(--red-dark);
+        line-height: 1.15;
+        letter-spacing: -0.3px;
+    }
+    @@media (min-width: 600px) { .page-header h1 { font-size: 1.9rem; } }
+    .page-header p {
+        color: var(--gray-500);
+        font-size: 0.875rem;
+        margin-top: 5px;
+    }
+    .header-accent {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-top: 12px;
+    }
+    .header-accent-bar {
+        height: 4px; width: 40px;
+        background: linear-gradient(90deg, var(--red-dark), var(--red-mid));
+        border-radius: 2px;
+    }
+    .header-accent-dot {
+        width: 6px; height: 6px;
+        background: var(--red-mid);
+        border-radius: 50%;
+        opacity: 0.5;
+    }
+
+    /* ── CARD ── */
+    .form-card {
+        background: var(--white);
+        border-radius: 18px;
+        box-shadow: var(--shadow-md);
+        border: 1px solid rgba(200,16,46,0.07);
+        overflow: hidden;
+    }
+    .card-header {
+        background: linear-gradient(135deg, var(--red-dark) 0%, var(--red-mid) 100%);
+        padding: 1.25rem 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        position: relative;
+        overflow: hidden;
+    }
+    .card-header::after {
+        content: '';
+        position: absolute;
+        right: -30px; top: -30px;
+        width: 110px; height: 110px;
+        background: rgba(255,255,255,0.06);
+        border-radius: 50%;
+    }
+    @@media (min-width: 600px) { .card-header { padding: 1.4rem 2rem; } }
+    .card-header-icon {
+        width: 40px; height: 40px;
+        background: rgba(255,255,255,0.15);
+        border-radius: 10px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.15rem;
+        flex-shrink: 0;
+        z-index: 1;
+    }
+    .card-header-text { z-index: 1; }
+    .card-header h2 {
+        font-family: 'Barlow', sans-serif;
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--white);
+        letter-spacing: 0.2px;
+        margin: 0;
+    }
+    .card-header p { font-size: 0.77rem; color: rgba(255,255,255,0.68); margin: 2px 0 0; }
+    .card-body { padding: 1.5rem; }
+    @@media (min-width: 600px) { .card-body { padding: 2rem; } }
+
+    /* ── FORM ── */
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1.1rem;
+    }
+    @@media (min-width: 520px) {
+        .form-grid { grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+    }
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+    .form-group.full { grid-column: 1 / -1; }
+
+    label {
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--gray-700);
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        margin-bottom: 0;
+    }
+    label .req { color: var(--red); margin-left: 2px; }
+
+    input[type="number"] {
+        width: 100%;
+        padding: 0.72rem 1rem;
+        border: 1.5px solid var(--gray-200);
+        border-radius: 10px;
+        font-family: 'Inter', sans-serif;
+        font-size: 1rem;
+        color: var(--gray-900);
+        background: var(--white);
+        transition: all 0.2s;
+        outline: none;
+        min-height: 46px;
+        font-weight: 500;
+    }
+    input[type="number"]:focus {
+        border-color: var(--red);
+        box-shadow: 0 0 0 3px rgba(200,16,46,0.1);
+    }
+    input[type="number"]:hover { border-color: var(--red-mid); }
+    .input-hint { font-size: 0.76rem; color: var(--gray-400); margin-top: 2px; }
+
+    /* ── CURRENT VALUE BADGE ── */
+    .current-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        background: var(--red-xlight);
+        border: 1px solid var(--red-light);
+        color: var(--red-dark);
+        font-size: 0.75rem;
+        font-weight: 600;
+        padding: 3px 9px;
+        border-radius: 20px;
+        margin-top: 3px;
+        transition: all 0.3s;
+    }
+    .current-badge .badge-dot {
+        width: 6px; height: 6px;
+        background: var(--red);
+        border-radius: 50%;
+    }
+    .current-badge.hidden { display: none; }
+
+    /* ── TIME SUMMARY GRID ── */
+    .time-summary {
+        background: var(--red-xlight);
+        border: 1px solid var(--red-light);
+        border-radius: 12px;
+        padding: 1rem 1.1rem;
+        margin-top: 0.5rem;
+    }
+    .time-summary-title {
+        font-size: 0.72rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: var(--red);
+        margin-bottom: 0.65rem;
+    }
+    .time-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 6px;
+    }
+    @@media (min-width: 400px) { .time-grid { grid-template-columns: repeat(6, 1fr); } }
+    .time-cell {
+        background: var(--white);
+        border: 1.5px solid var(--gray-200);
+        border-radius: 8px;
+        padding: 6px 4px;
+        text-align: center;
+        transition: all 0.25s;
+    }
+    .time-cell.active {
+        border-color: var(--red);
+        background: var(--red-light);
+    }
+    .time-cell-label {
+        font-size: 0.65rem;
+        font-weight: 700;
+        color: var(--gray-400);
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+    }
+    .time-cell.active .time-cell-label { color: var(--red-dark); }
+    .time-cell-val {
+        font-size: 0.92rem;
+        font-weight: 700;
+        color: var(--gray-700);
+        margin-top: 2px;
+    }
+    .time-cell.active .time-cell-val { color: var(--red-dark); }
+
+    /* ── SELECT2 THEME ── */
+    .select2-container--default .select2-selection--single {
+        height: 46px !important;
+        border: 1.5px solid var(--gray-200) !important;
+        border-radius: 10px !important;
+        display: flex !important;
+        align-items: center !important;
+        padding: 0 0.75rem !important;
+        background: var(--white) !important;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .select2-container--default.select2-container--focus .select2-selection--single,
+    .select2-container--default.select2-container--open .select2-selection--single {
+        border-color: var(--red) !important;
+        box-shadow: 0 0 0 3px rgba(200,16,46,0.1) !important;
+        outline: none !important;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        color: var(--gray-900) !important;
+        font-family: 'Inter', sans-serif !important;
+        font-size: 0.93rem !important;
+        font-weight: 500 !important;
+        line-height: 46px !important;
+        padding: 0 !important;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__placeholder {
+        color: var(--gray-400) !important;
+        font-weight: 400 !important;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        height: 46px !important; right: 8px !important;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__arrow b {
+        border-color: var(--red) transparent transparent transparent !important;
+    }
+    .select2-container--default.select2-container--open .select2-selection--single .select2-selection__arrow b {
+        border-color: transparent transparent var(--red) transparent !important;
+    }
+    .select2-dropdown {
+        border: 1.5px solid var(--red-light) !important;
+        border-radius: 10px !important;
+        box-shadow: var(--shadow-md) !important;
+        font-family: 'Inter', sans-serif !important;
+        font-size: 0.92rem !important;
+        overflow: hidden;
+    }
+    .select2-container--default .select2-search--dropdown .select2-search__field {
+        border: 1.5px solid var(--gray-200) !important;
+        border-radius: 6px !important;
+        padding: 8px 10px !important;
+        font-family: 'Inter', sans-serif !important;
+        font-size: 0.9rem !important;
+        outline: none !important;
+    }
+    .select2-container--default .select2-search--dropdown .select2-search__field:focus {
+        border-color: var(--red) !important;
+    }
+    .select2-container--default .select2-results__option--highlighted[aria-selected] {
+        background-color: var(--red) !important;
+    }
+    .select2-container--default .select2-results__option[aria-selected=true] {
+        background-color: var(--red-xlight) !important;
+        color: var(--red-dark) !important;
+    }
+    .select2-results__option { padding: 10px 12px !important; }
+    .select2-container { width: 100% !important; }
+
+    /* ── DIVIDER ── */
+    .form-divider {
+        border: none;
+        border-top: 1px dashed var(--gray-200);
+        margin: 1.5rem 0;
+    }
+
+    /* ── BUTTONS ── */
+    .btn-row {
+        display: flex;
+        flex-direction: column-reverse;
+        gap: 10px;
+    }
+    @@media (min-width: 440px) {
+        .btn-row { flex-direction: row; justify-content: flex-end; gap: 10px; }
+    }
+    .btn {
+        padding: 0.8rem 1.5rem;
+        border-radius: 10px;
+        font-family: 'Inter', sans-serif;
+        font-size: 0.92rem;
+        font-weight: 600;
+        cursor: pointer;
+        border: none;
+        transition: all 0.2s;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 7px;
+        min-height: 46px;
+        width: 100%;
+    }
+    @@media (min-width: 440px) { .btn { width: auto; } }
+    .btn-outline {
+        background: var(--white);
+        border: 1.5px solid var(--gray-200);
+        color: var(--gray-500);
+    }
+    .btn-outline:hover { border-color: var(--red); color: var(--red); background: var(--red-xlight); }
+    .btn-primary {
+        background: linear-gradient(135deg, var(--red-dark) 0%, var(--red-mid) 100%);
+        color: var(--white);
+        box-shadow: 0 4px 14px rgba(200,16,46,0.35);
+    }
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(200,16,46,0.45); }
+    .btn-primary:active { transform: translateY(0); }
+    .btn-primary:disabled { opacity: 0.55; cursor: not-allowed; transform: none; }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+        display: none;
+        position: fixed; inset: 0;
+        background: rgba(60,0,10,0.45);
+        backdrop-filter: blur(4px);
+        z-index: 1000;
+        align-items: flex-end;
+        justify-content: center;
+    }
+    @@media (min-width: 540px) { .modal-overlay { align-items: center; } }
+    .modal-overlay.show { display: flex; animation: fadeIn 0.2s; }
+    .modal-box {
+        background: var(--white);
+        border-radius: 20px 20px 0 0;
+        padding: 1.75rem 1.25rem;
+        width: 100%;
+        box-shadow: var(--shadow-lg);
+        animation: slideUp 0.3s cubic-bezier(0.34,1.2,0.64,1);
+        max-height: 85vh;
+        overflow-y: auto;
+    }
+    @@media (min-width: 540px) {
+        .modal-box { border-radius: 16px; padding: 2rem; max-width: 420px; }
+    }
+    .modal-handle {
+        width: 40px; height: 4px;
+        background: var(--gray-200);
+        border-radius: 2px;
+        margin: 0 auto 1.25rem;
+    }
+    @@media (min-width: 540px) { .modal-handle { display: none; } }
+    .modal-icon {
+        width: 52px; height: 52px;
+        background: var(--red-xlight);
+        border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        margin: 0 auto 1rem;
+        font-size: 1.4rem;
+    }
+    .modal-box h3 {
+        font-family: 'Barlow', sans-serif;
+        font-size: 1.1rem;
+        font-weight: 800;
+        color: var(--red-dark);
+        text-align: center;
+        margin: 0;
+    }
+    .modal-box > p {
+        color: var(--gray-500);
+        font-size: 0.86rem;
+        text-align: center;
+        margin-top: 6px;
+        line-height: 1.6;
+    }
+    .modal-summary {
+        background: var(--red-xlight);
+        border-radius: 10px;
+        padding: 0.9rem 1rem;
+        margin: 1rem 0;
+        font-size: 0.85rem;
+    }
+    .modal-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 5px 0;
+        border-bottom: 1px solid rgba(200,16,46,0.08);
+        gap: 8px;
+    }
+    .modal-row:last-child { border-bottom: none; }
+    .modal-row span:first-child { color: var(--gray-500); flex-shrink: 0; }
+    .modal-row span:last-child { font-weight: 600; color: var(--red-dark); text-align: right; }
+    .modal-btns { display: flex; gap: 10px; margin-top: 1.25rem; }
+    .modal-btns .btn { flex: 1; }
+
+    /* ── TOAST ── */
+    .toast {
+        position: fixed;
+        bottom: 1.25rem; left: 50%;
+        transform: translateX(-50%) translateY(120px);
+        padding: 0.85rem 1.25rem;
+        border-radius: 12px;
+        font-size: 0.87rem;
+        font-weight: 600;
+        display: flex; align-items: center; gap: 10px;
+        box-shadow: var(--shadow-lg);
+        z-index: 9999;
+        transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+        width: calc(100% - 2rem);
+        max-width: 380px;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+    @@media (min-width: 600px) {
+        .toast {
+            top: 1.5rem; right: 1.5rem;
+            bottom: auto; left: auto;
+            transform: translateX(130%);
+            width: auto; max-width: 340px;
+        }
+        .toast.show { transform: translateX(0); }
+    }
+    .toast.success { background: var(--success); color: white; }
+    .toast.error   { background: var(--danger);  color: white; }
+
+    @@keyframes fadeIn  { from { opacity: 0; } to { opacity: 1; } }
+    @@keyframes slideUp { from { transform: translateY(40px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+</style>
+}
+
+<div class="page-wrapper">
+    <div class="page-header">
+        <h1 data-i18n="page_title_input">Input Result</h1>
+        <p data-i18n="page_subtitle_input">Enter production results by time slot</p>
+        <div class="header-accent">
+            <div class="header-accent-bar"></div>
+            <div class="header-accent-dot"></div>
+            <div class="header-accent-dot"></div>
+        </div>
+    </div>
+
+    <div class="form-card">
+        <div class="card-header">
+            <div class="card-header-icon">📋</div>
+            <div class="card-header-text">
+                <h2 data-i18n="form_header">Production Entry Form</h2>
+                <p data-i18n="form_subheader">Select type, operation, time slot and enter quantity</p>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="form-grid">
+
+                <!-- TYPE -->
+                <div class="form-group">
+                    <label><span data-i18n="label_type">Type</span> <span class="req">*</span></label>
+                    <select id="typeSelect">
+                        <option value="" data-i18n="placeholder_type">-- Select Type --</option>
+                        <option value="Production Qty">Production Qty</option>
+                        <option value="Defect">Defect</option>
+                        <option value="Man Qty">Man Qty</option>
+                    </select>
+                </div>
+
+                <!-- OPERATION -->
+                <div class="form-group">
+                    <label><span data-i18n="label_operation">Operation</span> <span class="req">*</span></label>
+                    <select id="operationSelect">
+                        <option value="" data-i18n="placeholder_operation">-- Select Operation --</option>
+                        @foreach (var op in operations)
+                        {
+                            <option value="@op">@op</option>
+                        }
+                    </select>
+                </div>
+
+                <!-- TIME SLOT -->
+                <div class="form-group">
+                    <label><span data-i18n="label_time">Time</span> <span class="req">*</span></label>
+                    <select id="timeSelect">
+                        <option value="" data-i18n="placeholder_time">-- Select Time --</option>
+                        <option value="Time1">Time 1 (8h-10h)</option>
+                        <option value="Time2">Time 2 (10h-12h)</option>
+                        <option value="Time3">Time 3 (12h30-15h30)</option>
+                        <option value="Time4">Time 4 (15h30-17h30)</option>
+                        <option value="Time5">Time 5 (18h30-21h)</option>
+                        <option value="Time6">Time 6 (21h30-8h)</option>
+                    </select>
+                    <div id="currentBadge" class="current-badge hidden">
+                        <span class="badge-dot"></span>
+                        <span id="currentBadgeText">Current: 0</span>
+                    </div>
+                </div>
+
+                <!-- QUANTITY -->
+                <div class="form-group">
+                    <label><span data-i18n="label_quantity">Quantity</span> <span class="req">*</span></label>
+                    <input type="number" id="quantityInput"
+                           min="0" step="1"
+                           data-i18n-ph="placeholder_qty"
+                           placeholder="Enter quantity..."
+                           inputmode="numeric" />
+                    <span class="input-hint" data-i18n="hint_qty">Enter non-negative integer</span>
+                </div>
+
+                <!-- TIME SUMMARY: full width -->
+                <div class="form-group full" id="timeSummaryWrap" style="display:none;">
+                    <div class="time-summary">
+                        <div class="time-summary-title" data-i18n="summary_title">📊 Today's Totals</div>
+                        <div class="time-grid" id="timeGrid">
+                            @foreach (var t in new[]{"Time1","Time2","Time3","Time4","Time5","Time6"})
+                            {
+                                <div class="time-cell" id="cell_@t">
+                                    <div class="time-cell-label">@t</div>
+                                    <div class="time-cell-val" id="val_@t">0</div>
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <hr class="form-divider" />
+
+            <div class="btn-row">
+                <button class="btn btn-outline" onclick="resetForm()" data-i18n="btn_reset">🔄 Reset</button>
+                <button class="btn btn-primary" id="saveBtn" onclick="openConfirm()" data-i18n="btn_save">💾 Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CONFIRM MODAL -->
+<div class="modal-overlay" id="confirmModal">
+    <div class="modal-box">
+        <div class="modal-handle"></div>
+        <div class="modal-icon">💾</div>
+        <h3 data-i18n="modal_title">Confirm Save</h3>
+        <p data-i18n="modal_sub">Check information before saving.</p>
+        <div class="modal-summary" id="modalSummary"></div>
+        <div class="modal-btns">
+            <button class="btn btn-outline" onclick="closeModal()" data-i18n="btn_cancel">✖ Cancel</button>
+            <button class="btn btn-primary" id="confirmBtn" onclick="submitForm()" data-i18n="btn_confirm">✔ Confirm</button>
+        </div>
+    </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast">
+    <span id="toastIcon"></span>
+    <span id="toastMsg"></span>
+</div>
+
+@section Scripts {
+<script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.1.0-rc.0/js/select2.min.js"></script>
+<script>
+    const pathBase = '@Context.Request.PathBase'.replace(/\/$/, '');
+
+    let _currentValues = null;
+
+    // ── Select2 init ──────────────────────────────────────────────────────────
+    function initSelect2() {
+        const t = (typeof I18N !== 'undefined' && I18N[currentLang]) ? I18N[currentLang] : { placeholder_type: '-- Select Type --', placeholder_operation: '-- Select Operation --', placeholder_time: '-- Select Time --' };
+        $('#typeSelect').select2({ width: '100%', placeholder: t.placeholder_type, minimumResultsForSearch: Infinity });
+        $('#operationSelect').select2({ width: '100%', placeholder: t.placeholder_operation });
+        $('#timeSelect').select2({ width: '100%', placeholder: t.placeholder_time, minimumResultsForSearch: Infinity });
+    }
+
+    $(document).ready(function () {
+        initSelect2();
+
+        $('#typeSelect, #operationSelect').on('change', function () {
+            const type = $('#typeSelect').val();
+            const op   = $('#operationSelect').val();
+            if (type && op) {
+                loadCurrentValues(type, op);
+            } else {
+                _currentValues = null;
+                hideSummary();
+            }
+        });
+
+        $('#timeSelect').on('change', function () {
+            updateCurrentBadge($(this).val());
+        });
+    });
+
+    // ── Update Select2 placeholders on lang change ────────────────────────────
+    document.addEventListener('langChanged', function (e) {
+        const t = I18N[e.detail] || I18N.en;
+        // Update option text for empty placeholder options
+        $('#typeSelect option[value=""]').text(t.placeholder_type);
+        $('#operationSelect option[value=""]').text(t.placeholder_operation);
+        $('#timeSelect option[value=""]').text(t.placeholder_time);
+        // Force Select2 to re-render if nothing selected
+        if (!$('#typeSelect').val())      { $('#typeSelect').trigger('change.select2'); }
+        if (!$('#operationSelect').val()) { $('#operationSelect').trigger('change.select2'); }
+        if (!$('#timeSelect').val())      { $('#timeSelect').trigger('change.select2'); }
+        // Refresh badge text if visible
+        const slot = $('#timeSelect').val();
+        if (slot) updateCurrentBadge(slot);
+    });
+
+    // ── Load current values ───────────────────────────────────────────────────
+    async function loadCurrentValues(typeValue, operation) {
+        try {
+            const res  = await fetch(`${pathBase}/SM/GetCurrentValues?operation=${encodeURIComponent(operation)}&typeValue=${encodeURIComponent(typeValue)}`);
+            const data = await res.json();
+            _currentValues = data;
+            renderSummary(data);
+            const selectedTime = $('#timeSelect').val();
+            if (selectedTime) updateCurrentBadge(selectedTime);
+        } catch (e) {
+            console.error('GetCurrentValues error:', e);
+            _currentValues = null;
+            hideSummary();
+        }
+    }
+
+    function renderSummary(data) {
+        const keys   = ['time1','time2','time3','time4','time5','time6'];
+        const labels = ['Time1','Time2','Time3','Time4','Time5','Time6'];
+        const selectedTime = ($('#timeSelect').val() || '').toLowerCase();
+        let hasData = false;
+
+        keys.forEach(function (k, i) {
+            const val  = data[k] ?? 0;
+            if (val > 0) hasData = true;
+            const cell = document.getElementById('cell_' + labels[i]);
+            const valEl= document.getElementById('val_'  + labels[i]);
+            if (cell && valEl) {
+                valEl.textContent = val;
+                cell.classList.toggle('active', k === selectedTime && val > 0);
+            }
+        });
+
+        document.getElementById('timeSummaryWrap').style.display = hasData ? '' : 'none';
+    }
+
+    function hideSummary() {
+        document.getElementById('timeSummaryWrap').style.display = 'none';
+        ['Time1','Time2','Time3','Time4','Time5','Time6'].forEach(function (t) {
+            var v = document.getElementById('val_' + t);
+            if (v) v.textContent = '0';
+            var c = document.getElementById('cell_' + t);
+            if (c) c.classList.remove('active');
+        });
+    }
+
+    function updateCurrentBadge(timeSlot) {
+        const badge    = document.getElementById('currentBadge');
+        const badgeTxt = document.getElementById('currentBadgeText');
+        const t        = (typeof I18N !== 'undefined' && I18N[currentLang]) ? I18N[currentLang] : { badge_current: 'Current', badge_suffix: '→ will be added' };
+        if (!_currentValues || !timeSlot) { badge.classList.add('hidden'); return; }
+        const key = timeSlot.toLowerCase();
+        const val = _currentValues[key] ?? 0;
+
+        ['Time1','Time2','Time3','Time4','Time5','Time6'].forEach(function (tm) {
+            const c = document.getElementById('cell_' + tm);
+            const v = _currentValues[tm.toLowerCase()] ?? 0;
+            if (c) c.classList.toggle('active', tm.toLowerCase() === key && v > 0);
+        });
+
+        badge.classList.remove('hidden');
+        badgeTxt.textContent = t.badge_current + ': ' + val + ' ' + t.badge_suffix;
+    }
+
+    // ── Validate + open confirm ───────────────────────────────────────────────
+    function openConfirm() {
+        const t    = (typeof I18N !== 'undefined' && I18N[currentLang]) ? I18N[currentLang] : {};
+        const type = $('#typeSelect').val();
+        const op   = $('#operationSelect').val();
+        const time = $('#timeSelect').val();
+        const qty  = parseInt(document.getElementById('quantityInput').value);
+
+        if (!type)                { showToast(t.err_type    || 'Please select Type', 'error'); return; }
+        if (!op)                  { showToast(t.err_op      || 'Please select Operation', 'error'); return; }
+        if (!time)                { showToast(t.err_time    || 'Please select Time', 'error'); return; }
+        if (isNaN(qty) || qty < 0){ showToast(t.err_qty     || 'Quantity invalid', 'error'); return; }
+
+        const key      = time.toLowerCase();
+        const existing = _currentValues ? (_currentValues[key] ?? 0) : 0;
+        const newTotal = existing + qty;
+        const typeLabel = { 'Production Qty': 'Production Qty', 'Defect': 'Defect (NG_Qty)', 'Man Qty': "Man Qty (Man Q'ty)" };
+
+        document.getElementById('modalSummary').innerHTML = `
+            <div class="modal-row"><span>${t.modal_type || 'Type'}</span><span>${typeLabel[type] || type}</span></div>
+            <div class="modal-row"><span>${t.modal_op   || 'Operation'}</span><span>${op}</span></div>
+            <div class="modal-row"><span>${t.modal_time || 'Time Slot'}</span><span>${time}</span></div>
+            <div class="modal-row"><span>${t.modal_add  || 'Add'}</span><span>+ ${qty}</span></div>
+            <div class="modal-row"><span>${t.modal_total|| 'Total after save'}</span><span>${newTotal}</span></div>
+        `;
+        document.getElementById('confirmModal').classList.add('show');
+    }
+
+    function closeModal() {
+        document.getElementById('confirmModal').classList.remove('show');
+    }
+
+    // ── Submit ────────────────────────────────────────────────────────────────
+    async function submitForm() {
+        const btn  = document.getElementById('confirmBtn');
+        const t    = (typeof I18N !== 'undefined' && I18N[currentLang]) ? I18N[currentLang] : { saving: '⏳ Saving...', btn_confirm: '✔ Confirm', err_network: 'Network error.' };
+        const type = $('#typeSelect').val();
+        const op   = $('#operationSelect').val();
+        const time = $('#timeSelect').val();
+        const qty  = parseInt(document.getElementById('quantityInput').value);
+
+        btn.disabled    = true;
+        btn.textContent = t.saving;
+
+        try {
+            const res    = await fetch(`${pathBase}/SM/SaveResult`, {
+                method:  'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body:    JSON.stringify({ typeValue: type, operation: op, timeSlot: time, quantity: qty })
+            });
+            const result = await res.json();
+            closeModal();
+
+            if (result.success) {
+                showToast(result.message, 'success');
+                const savedType = type;
+                // Reset operation, time, quantity — keep type
+                $('#operationSelect').val('').trigger('change');
+                $('#timeSelect').val('').trigger('change');
+                document.getElementById('quantityInput').value = '';
+                _currentValues = null;
+                hideSummary();
+                document.getElementById('currentBadge').classList.add('hidden');
+                // Re-select saved type
+                $('#typeSelect').val(savedType).trigger('change');
+            } else {
+                showToast(result.message, 'error');
+            }
+        } catch (e) {
+            closeModal();
+            const t2 = (typeof I18N !== 'undefined' && I18N[currentLang]) ? I18N[currentLang] : {};
+            showToast(t2.err_network || 'Network error.', 'error');
+        } finally {
+            btn.disabled    = false;
+            btn.textContent = t.btn_confirm;
+        }
+    }
+
+    // ── Reset ─────────────────────────────────────────────────────────────────
+    function resetForm() {
+        $('#typeSelect').val('').trigger('change');
+        $('#operationSelect').val('').trigger('change');
+        $('#timeSelect').val('').trigger('change');
+        document.getElementById('quantityInput').value = '';
+        _currentValues = null;
+        hideSummary();
+        document.getElementById('currentBadge').classList.add('hidden');
+    }
+
+    // ── Toast ─────────────────────────────────────────────────────────────────
+    function showToast(msg, type) {
+        const toast = document.getElementById('toast');
+        toast.className = 'toast ' + type;
+        document.getElementById('toastIcon').textContent = type === 'success' ? '✅' : '❌';
+        document.getElementById('toastMsg').textContent  = msg;
+        toast.classList.add('show');
+        setTimeout(function () { toast.classList.remove('show'); }, 3500);
+    }
+
+    document.getElementById('confirmModal').addEventListener('click', function (e) {
+        if (e.target === this) closeModal();
+    });
+</script>
+}

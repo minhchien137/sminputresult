@@ -1,0 +1,687 @@
+@{
+    ViewData["Title"] = "Input Result History";
+}
+
+@section Head {
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Barlow:wght@600;700;800&display=swap" rel="stylesheet" />
+<style>
+    :root {
+        --red:        #C8102E;
+        --red-dark:   #9B0B22;
+        --red-mid:    #E63950;
+        --red-light:  #FFE5E9;
+        --red-xlight: #FFF5F6;
+        --white:      #FFFFFF;
+        --gray-50:    #F9FAFB;
+        --gray-100:   #F3F4F6;
+        --gray-200:   #E5E7EB;
+        --gray-400:   #9CA3AF;
+        --gray-500:   #6B7280;
+        --gray-600:   #4B5563;
+        --gray-700:   #374151;
+        --gray-900:   #111827;
+        --success:    #059669;
+        --shadow-sm:  0 1px 3px rgba(200,16,46,0.07);
+        --shadow-md:  0 4px 20px rgba(200,16,46,0.11);
+    }
+
+    body {
+        font-family: 'Inter', sans-serif;
+        background: var(--gray-50);
+        min-height: 100vh;
+        background-image:
+            radial-gradient(ellipse at 10% 30%, rgba(200,16,46,0.05) 0%, transparent 55%),
+            radial-gradient(ellipse at 90% 70%, rgba(230,57,80,0.04) 0%, transparent 50%);
+    }
+
+    /* ── LAYOUT ── */
+    .page-wrapper { max-width: 1400px; margin: 0 auto; padding: 1.5rem 1rem; }
+    @@media (min-width: 600px) { .page-wrapper { padding: 2.5rem 1.5rem; } }
+
+    /* ── PAGE HEADER ── */
+    .page-header { margin-bottom: 1.5rem; }
+    .page-header h1 {
+        font-family: 'Barlow', sans-serif;
+        font-size: 1.6rem; font-weight: 800;
+        color: var(--red-dark); letter-spacing: -0.3px; margin: 0;
+    }
+    @@media (min-width: 600px) { .page-header h1 { font-size: 1.9rem; } }
+    .page-header p { color: var(--gray-500); font-size: 0.875rem; margin-top: 5px; }
+    .header-accent { display: flex; align-items: center; gap: 8px; margin-top: 12px; }
+    .header-accent-bar { height: 4px; width: 40px; background: linear-gradient(90deg, var(--red-dark), var(--red-mid)); border-radius: 2px; }
+    .header-accent-dot { width: 6px; height: 6px; background: var(--red-mid); border-radius: 50%; opacity: 0.5; }
+
+    /* ── FILTER CARD ── */
+    .filter-card {
+        background: var(--white);
+        border-radius: 14px;
+        border: 1px solid rgba(200,16,46,0.07);
+        box-shadow: var(--shadow-sm);
+        margin-bottom: 1.25rem;
+        overflow: hidden;
+    }
+    .filter-header {
+        background: var(--red-xlight);
+        padding: 0.9rem 1.25rem;
+        display: flex; align-items: center; justify-content: space-between;
+        border-bottom: 1px solid var(--red-light);
+        cursor: pointer; user-select: none;
+    }
+    .filter-header h3 {
+        font-family: 'Barlow', sans-serif;
+        font-size: 0.92rem; font-weight: 700;
+        color: var(--red-dark);
+        display: flex; align-items: center; gap: 8px;
+        margin: 0;
+    }
+    .filter-toggle { font-size: 0.8rem; color: var(--red); font-weight: 700; transition: transform 0.2s; }
+    .filter-toggle.collapsed { transform: rotate(-90deg); }
+    @@media (min-width: 768px) { .filter-toggle { display: none; } }
+
+    .filter-body { padding: 1rem 1.25rem; }
+    .filter-body.collapsed { display: none; }
+    @@media (min-width: 768px) { .filter-body { display: block !important; } }
+
+    /* ── FILTER GRID ── */
+    .filter-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+    }
+    @@media (min-width: 600px)  { .filter-grid { grid-template-columns: repeat(3, 1fr); gap: 1rem; } }
+    @@media (min-width: 1000px) { .filter-grid { grid-template-columns: repeat(6, 1fr) auto; align-items: end; gap: 1rem; } }
+
+    .filter-group { display: flex; flex-direction: column; gap: 5px; }
+    .filter-group.btn-col { grid-column: 1 / -1; }
+    @@media (min-width: 600px) { .filter-group.btn-col { grid-column: auto; } }
+
+    .filter-group label {
+        font-size: 0.73rem; font-weight: 700;
+        color: var(--gray-700);
+        text-transform: uppercase; letter-spacing: 0.4px;
+        margin: 0;
+    }
+    .filter-group select,
+    .filter-group input {
+        padding: 0.65rem 0.85rem;
+        border: 1.5px solid var(--gray-200);
+        border-radius: 8px;
+        font-family: 'Inter', sans-serif;
+        font-size: 0.88rem;
+        color: var(--gray-900);
+        background: var(--white);
+        outline: none; transition: all 0.2s;
+        appearance: none; -webkit-appearance: none;
+        min-height: 42px; width: 100%;
+    }
+    .filter-group select {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23C8102E' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 10px center;
+        padding-right: 30px;
+    }
+    .filter-group select:focus,
+    .filter-group input:focus {
+        border-color: var(--red);
+        box-shadow: 0 0 0 3px rgba(200,16,46,0.1);
+    }
+
+    /* ── BUTTONS ── */
+    .btn-filter-row { display: flex; gap: 8px; flex-wrap: nowrap; }
+    .btn {
+        padding: 0.65rem 1.1rem;
+        border-radius: 8px;
+        font-family: 'Inter', sans-serif;
+        font-size: 0.86rem; font-weight: 600;
+        cursor: pointer; border: none;
+        transition: all 0.2s;
+        display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+        white-space: nowrap; min-height: 42px;
+    }
+    .btn-primary {
+        background: linear-gradient(135deg, var(--red-dark) 0%, var(--red-mid) 100%);
+        color: var(--white);
+        box-shadow: 0 3px 10px rgba(200,16,46,0.28);
+    }
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 5px 16px rgba(200,16,46,0.38); }
+    .btn-outline {
+        background: var(--white);
+        border: 1.5px solid var(--gray-200);
+        color: var(--gray-500);
+    }
+    .btn-outline:hover { border-color: var(--red); color: var(--red); background: var(--red-xlight); }
+
+    /* ── TABLE CARD ── */
+    .table-card {
+        background: var(--white);
+        border-radius: 14px;
+        border: 1px solid rgba(200,16,46,0.07);
+        box-shadow: var(--shadow-md);
+        overflow: hidden;
+    }
+    .table-toolbar {
+        padding: 0.9rem 1.25rem;
+        display: flex; align-items: center; justify-content: space-between;
+        border-bottom: 1px solid var(--gray-100);
+        gap: 12px; flex-wrap: wrap;
+    }
+    .table-toolbar h3 {
+        font-family: 'Barlow', sans-serif;
+        font-size: 0.95rem; font-weight: 700;
+        color: var(--red-dark); margin: 0;
+    }
+    .toolbar-right { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .record-count { font-size: 0.8rem; color: var(--gray-400); }
+
+    .page-size-wrap { display: flex; align-items: center; gap: 6px; }
+    .page-size-wrap label { font-size: 0.78rem; font-weight: 600; color: var(--gray-600); white-space: nowrap; margin: 0; }
+    .page-size-select {
+        padding: 0.35rem 1.6rem 0.35rem 0.65rem;
+        border: 1.5px solid var(--gray-200);
+        border-radius: 7px;
+        font-family: 'Inter', sans-serif;
+        font-size: 0.82rem; color: var(--gray-900);
+        background: var(--white); outline: none;
+        appearance: none; -webkit-appearance: none; cursor: pointer;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23C8102E' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+        background-repeat: no-repeat; background-position: right 8px center;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .page-size-select:focus { border-color: var(--red); box-shadow: 0 0 0 3px rgba(200,16,46,0.1); }
+
+    /* ── BADGES ── */
+    .badge {
+        display: inline-block; padding: 2px 9px; border-radius: 20px;
+        font-size: 0.74rem; font-weight: 600; white-space: nowrap;
+    }
+    .badge-prod    { background: #dbeafe; color: #1e3a5f; }
+    .badge-defect  { background: #fee2e2; color: #991b1b; }
+    .badge-man     { background: #d1fae5; color: #065f46; }
+
+    .time-pill {
+        display: inline-flex; align-items: center; gap: 4px;
+        background: var(--red-xlight); border: 1px solid var(--red-light);
+        color: var(--red-dark);
+        padding: 2px 8px; border-radius: 20px;
+        font-size: 0.74rem; font-weight: 700;
+    }
+
+    /* ── DELTA DISPLAY ── */
+    .qty-added  { font-weight: 700; color: var(--red); font-size: 0.95rem; }
+    .qty-before { font-size: 0.78rem; color: var(--gray-400); }
+    .qty-after  { font-weight: 600; color: var(--success); font-size: 0.88rem; }
+    .arrow      { color: var(--gray-400); font-size: 0.75rem; }
+
+    /* ── TABLE ── */
+    .table-wrapper { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.86rem; min-width: 700px; }
+    thead { background: linear-gradient(135deg, var(--red-dark) 0%, var(--red-mid) 100%); }
+    thead th {
+        padding: 0.85rem 1rem;
+        text-align: left;
+        font-family: 'Barlow', sans-serif;
+        font-size: 0.73rem; font-weight: 700;
+        color: rgba(255,255,255,0.9);
+        letter-spacing: 0.6px; text-transform: uppercase; white-space: nowrap;
+    }
+    tbody tr { border-bottom: 1px solid var(--gray-100); transition: background 0.15s; }
+    tbody tr:hover { background: var(--red-xlight); }
+    tbody tr:last-child { border-bottom: none; }
+    tbody td { padding: 0.75rem 1rem; color: var(--gray-700); vertical-align: middle; }
+    .td-id    { color: var(--gray-400); font-size: 0.76rem; font-weight: 600; }
+    .td-date  { color: var(--gray-500); font-size: 0.78rem; white-space: nowrap; }
+    .td-op    { font-weight: 500; max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .td-ip    { font-size: 0.76rem; color: var(--gray-400); font-family: monospace; }
+    .td-note  { font-size: 0.81rem; color: var(--gray-500); max-width: 160px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .no-val   { color: var(--gray-400); font-size: 0.78rem; }
+
+    /* ── MOBILE CARD ── */
+    .card-list { display: none; }
+    @@media (max-width: 720px) {
+        .table-wrapper table { display: none; }
+        .card-list { display: block; }
+    }
+    .data-card {
+        border-bottom: 1px solid var(--gray-100);
+        padding: 1rem 1.25rem;
+        transition: background 0.15s;
+    }
+    .data-card:last-child { border-bottom: none; }
+    .data-card:hover { background: var(--red-xlight); }
+    .data-card-top {
+        display: flex; justify-content: space-between; align-items: flex-start;
+        margin-bottom: 0.6rem;
+    }
+    .data-card-op  { font-weight: 700; color: var(--red-dark); font-size: 0.92rem; }
+    .data-card-id  { font-size: 0.73rem; color: var(--gray-400); font-weight: 600; }
+    .data-card-body { display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem 0.75rem; }
+    .data-card-field { display: flex; flex-direction: column; gap: 2px; }
+    .data-card-field.full { grid-column: 1 / -1; }
+    .data-card-label { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; color: var(--gray-400); letter-spacing: 0.3px; }
+    .data-card-value { font-size: 0.86rem; color: var(--gray-700); }
+
+    /* ── EMPTY / LOADING ── */
+    .empty-state { text-align: center; padding: 3rem 1.5rem; color: var(--gray-400); }
+    .empty-state-icon { font-size: 2.5rem; margin-bottom: 0.75rem; opacity: 0.5; }
+    .empty-state p { font-size: 0.9rem; }
+    .loading-state { text-align: center; padding: 2.5rem; color: var(--red); }
+    .spinner {
+        width: 32px; height: 32px;
+        border: 3px solid var(--red-light);
+        border-top-color: var(--red);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        margin: 0 auto 0.9rem;
+    }
+    @@keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── PAGINATION ── */
+    .pagination-bar {
+        display: flex; align-items: center; justify-content: space-between;
+        flex-wrap: wrap; gap: 10px;
+        padding: 0.85rem 1.25rem;
+        border-top: 1px solid var(--gray-100);
+        background: var(--gray-50);
+        border-radius: 0 0 14px 14px;
+    }
+    .pagination-info { font-size: 0.8rem; color: var(--gray-600); white-space: nowrap; }
+    .pagination-info strong { color: var(--red-dark); font-weight: 700; }
+    .pagination-controls { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; }
+    .pg-btn {
+        min-width: 34px; height: 34px; padding: 0 8px;
+        border-radius: 7px; border: 1.5px solid var(--gray-200);
+        background: var(--white); color: var(--gray-600);
+        font-family: 'Inter', sans-serif; font-size: 0.82rem; font-weight: 600;
+        cursor: pointer; transition: all 0.18s;
+        display: inline-flex; align-items: center; justify-content: center;
+    }
+    .pg-btn:hover:not(:disabled):not(.pg-active) {
+        border-color: var(--red); color: var(--red); background: var(--red-xlight);
+    }
+    .pg-btn.pg-active {
+        background: linear-gradient(135deg, var(--red-dark) 0%, var(--red-mid) 100%);
+        border-color: var(--red); color: var(--white);
+        box-shadow: 0 2px 8px rgba(200,16,46,0.25); cursor: default;
+    }
+    .pg-btn:disabled { opacity: 0.35; cursor: not-allowed; background: var(--gray-100); }
+    .pg-ellipsis { display: inline-flex; align-items: center; justify-content: center; min-width: 28px; height: 34px; color: var(--gray-400); font-size: 0.85rem; }
+    @@media (max-width: 480px) { .pagination-bar { flex-direction: column; align-items: flex-start; } }
+</style>
+}
+
+<div class="page-wrapper">
+    <div class="page-header">
+        <h1 data-i18n="page_title_history">History</h1>
+        <p data-i18n="page_subtitle_history">History of each production data entry</p>
+        <div class="header-accent">
+            <div class="header-accent-bar"></div>
+            <div class="header-accent-dot"></div>
+            <div class="header-accent-dot"></div>
+        </div>
+    </div>
+
+    <!-- FILTER -->
+    <div class="filter-card">
+        <div class="filter-header" onclick="toggleFilter()">
+            <h3 data-i18n="filter_title">🔍 Search Filters</h3>
+            <span class="filter-toggle" id="filterToggle">▼</span>
+        </div>
+        <div class="filter-body" id="filterBody">
+            <div class="filter-grid">
+
+                <div class="filter-group">
+                    <label data-i18n="tbl_type">Type</label>
+                    <select id="filterType">
+                        <option value="" data-i18n="ph_all">-- All --</option>
+                        <option value="Production Qty">Production Qty</option>
+                        <option value="Defect">Defect</option>
+                        <option value="Man Qty">Man Qty</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label data-i18n="tbl_op">Operation</label>
+                    <select id="filterOperation">
+                        <option value="" data-i18n="ph_all">-- All --</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label data-i18n="tbl_time">Time Slot</label>
+                    <select id="filterTimeSlot">
+                        <option value="" data-i18n="ph_all">-- All --</option>
+                        <option value="Time1">Time 1</option>
+                        <option value="Time2">Time 2</option>
+                        <option value="Time3">Time 3</option>
+                        <option value="Time4">Time 4</option>
+                        <option value="Time5">Time 5</option>
+                        <option value="Time6">Time 6</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label data-i18n="lbl_date_from">From Date</label>
+                    <input type="date" id="filterDateFrom" />
+                </div>
+
+                <div class="filter-group">
+                    <label data-i18n="lbl_date_to">To Date</label>
+                    <input type="date" id="filterDateTo" />
+                </div>
+
+                <div class="filter-group btn-col">
+                    <label style="visibility:hidden">‎</label>
+                    <div class="btn-filter-row">
+                        <button class="btn btn-primary" onclick="loadData()" data-i18n="btn_search">🔍 Search</button>
+                        <button class="btn btn-outline" onclick="clearFilters()" data-i18n="btn_clear">✖ Clear</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- TABLE -->
+    <div class="table-card">
+        <div class="table-toolbar">
+            <h3 data-i18n="tbl_title">📊 Entry History</h3>
+            <div class="toolbar-right">
+                <div class="page-size-wrap">
+                    <label data-i18n="show_lbl">Show</label>
+                    <select class="page-size-select" id="pageSizeSelect" onchange="onPageSizeChange()">
+                        <option value="25">25</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                        <option value="200">200</option>
+                    </select>
+                </div>
+                <span class="record-count" id="recordCount"></span>
+            </div>
+        </div>
+
+        <!-- Desktop table -->
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th data-i18n="tbl_id">#ID</th>
+                        <th data-i18n="tbl_date">Prod Date</th>
+                        <th data-i18n="tbl_type">Type</th>
+                        <th data-i18n="tbl_op">Operation</th>
+                        <th data-i18n="tbl_time">Time Slot</th>
+                        <th data-i18n="tbl_added">Added</th>
+                        <th data-i18n="tbl_before">Before</th>
+                        <th data-i18n="tbl_after">After</th>
+                        <th data-i18n="tbl_saved">Saved At</th>
+                        <th data-i18n="tbl_ip">IP</th>
+                        <th data-i18n="tbl_note">Note</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <tr><td colspan="11">
+                        <div class="loading-state"><div class="spinner"></div><p id="initLoadingText">Loading...</p></div>
+                    </td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Mobile cards -->
+        <div class="card-list" id="cardList">
+            <div class="loading-state"><div class="spinner"></div><p>Loading...</p></div>
+        </div>
+
+        <div class="pagination-bar" id="paginationBar" style="display:none;"></div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    const pathBase = '@Context.Request.PathBase'.replace(/\/$/, '');
+    let currentData = [];
+    let currentPage = 1;
+    let pageSize    = 25;
+
+    function t(key) {
+        return (typeof I18N !== 'undefined' && I18N[currentLang] && I18N[currentLang][key] !== undefined)
+            ? I18N[currentLang][key]
+            : (I18N && I18N.en && I18N.en[key]) || key;
+    }
+
+    // ── Filter collapsible ────────────────────────────────────────────────────
+    let filterOpen = true;
+    function toggleFilter() {
+        if (window.innerWidth >= 768) return;
+        filterOpen = !filterOpen;
+        document.getElementById('filterBody').classList.toggle('collapsed', !filterOpen);
+        document.getElementById('filterToggle').classList.toggle('collapsed', !filterOpen);
+    }
+
+    window.addEventListener('DOMContentLoaded', function () {
+        if (window.innerWidth < 768) {
+            filterOpen = false;
+            document.getElementById('filterBody').classList.add('collapsed');
+            document.getElementById('filterToggle').classList.add('collapsed');
+        }
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('filterDateFrom').value = today;
+        document.getElementById('filterDateTo').value   = today;
+        loadOperations().then(function () { loadData(); });
+    });
+
+    // Re-render on language change
+    document.addEventListener('langChanged', function () {
+        renderPage(currentPage);
+    });
+
+    // ── Load distinct operations ──────────────────────────────────────────────
+    async function loadOperations() {
+        try {
+            const res = await fetch(`${pathBase}/SM/GetOperationsForFilter`);
+            const ops = await res.json();
+            const sel = document.getElementById('filterOperation');
+            ops.forEach(function (op) {
+                const o = document.createElement('option');
+                o.value = op; o.textContent = op;
+                sel.appendChild(o);
+            });
+        } catch (e) { console.error('loadOperations error:', e); }
+    }
+
+    // ── Load Data ─────────────────────────────────────────────────────────────
+    async function loadData() {
+        const typeDisplay = document.getElementById('filterType').value;
+        const operation   = document.getElementById('filterOperation').value;
+        const timeSlot    = document.getElementById('filterTimeSlot').value;
+        const dateFrom    = document.getElementById('filterDateFrom').value;
+        const dateTo      = document.getElementById('filterDateTo').value;
+
+        const loadingHTML = `<div class="loading-state"><div class="spinner"></div><p>${t('loading')}</p></div>`;
+        document.getElementById('tableBody').innerHTML   = `<tr><td colspan="11">${loadingHTML}</td></tr>`;
+        document.getElementById('cardList').innerHTML    = loadingHTML;
+        document.getElementById('paginationBar').style.display = 'none';
+        document.getElementById('recordCount').textContent = t('loading');
+
+        const params = new URLSearchParams();
+        if (typeDisplay) params.append('typeDisplay', typeDisplay);
+        if (operation)   params.append('operation',   operation);
+        if (timeSlot)    params.append('timeSlot',    timeSlot);
+        if (dateFrom)    params.append('dateFrom',    dateFrom);
+        if (dateTo)      params.append('dateTo',      dateTo);
+
+        try {
+            const res  = await fetch(`${pathBase}/SM/GetInputHistory?` + params.toString());
+            const data = await res.json();
+            currentData = data;
+            currentPage = 1;
+            renderPage(1);
+        } catch (e) {
+            console.error('GetInputHistory error:', e);
+            const errHTML = `<div class="empty-state"><div class="empty-state-icon">⚠️</div><p>${t('load_err')}: ${escHtml(e.message)}</p></div>`;
+            document.getElementById('tableBody').innerHTML = `<tr><td colspan="11">${errHTML}</td></tr>`;
+            document.getElementById('cardList').innerHTML  = errHTML;
+            document.getElementById('recordCount').textContent = t('load_err');
+        }
+    }
+
+    // ── Render page ───────────────────────────────────────────────────────────
+    function renderPage(page) {
+        const total      = currentData.length;
+        const totalPages = Math.ceil(total / pageSize);
+        currentPage      = Math.max(1, Math.min(page, totalPages || 1));
+
+        const start = (currentPage - 1) * pageSize;
+        const end   = Math.min(start + pageSize, total);
+        const slice = currentData.slice(start, end);
+
+        if (total === 0) {
+            document.getElementById('recordCount').textContent = t('no_data');
+        } else {
+            document.getElementById('recordCount').textContent =
+                `${t('pg_showing')} ${start + 1}–${end} / ${total} ${t('pg_records')}`;
+        }
+
+        if (slice.length === 0) {
+            const emptyHTML = `<div class="empty-state"><div class="empty-state-icon">📭</div><p>${t('no_data')}</p></div>`;
+            document.getElementById('tableBody').innerHTML = `<tr><td colspan="11">${emptyHTML}</td></tr>`;
+            document.getElementById('cardList').innerHTML  = emptyHTML;
+            document.getElementById('paginationBar').style.display = 'none';
+            return;
+        }
+
+        const locale = (typeof currentLang !== 'undefined' && currentLang === 'cn') ? 'zh-CN' : 'en-US';
+
+        // ── Desktop rows ──
+        document.getElementById('tableBody').innerHTML = slice.map(function (row) {
+            const typeBadge = row.typeDisplay === 'Production Qty' ? 'badge-prod'
+                            : row.typeDisplay === 'Defect'         ? 'badge-defect'
+                            : 'badge-man';
+            const createdAt = row.createdAt ? new Date(row.createdAt).toLocaleString(locale) : '—';
+            const prodDate  = row.productionDate
+                ? row.productionDate.substring(6,8) + '/' + row.productionDate.substring(4,6) + '/' + row.productionDate.substring(0,4)
+                : '—';
+            const before = row.quantityBefore ?? 0;
+            const added  = row.quantityAdded  ?? 0;
+            const after  = row.quantityAfter  ?? 0;
+
+            return `
+            <tr>
+                <td class="td-id">#${row.id}</td>
+                <td class="td-date">${prodDate}</td>
+                <td><span class="badge ${typeBadge}">${escHtml(row.typeDisplay ?? '—')}</span></td>
+                <td class="td-op" title="${escHtml(row.operation ?? '')}">${escHtml(row.operation ?? '—')}</td>
+                <td><span class="time-pill">⏱ ${escHtml(row.timeSlot ?? '—')}</span></td>
+                <td class="qty-added">+${fmtNum(added)}</td>
+                <td class="qty-before">${fmtNum(before)}</td>
+                <td class="qty-after">→ ${fmtNum(after)}</td>
+                <td class="td-date">${createdAt}</td>
+                <td class="td-ip">${escHtml(row.clientIp ?? '—')}</td>
+                <td class="td-note" title="${escHtml(row.note ?? '')}">${row.note ? escHtml(row.note) : '<span class="no-val">—</span>'}</td>
+            </tr>`;
+        }).join('');
+
+        // ── Mobile cards ──
+        document.getElementById('cardList').innerHTML = slice.map(function (row) {
+            const typeBadge = row.typeDisplay === 'Production Qty' ? 'badge-prod'
+                            : row.typeDisplay === 'Defect'         ? 'badge-defect'
+                            : 'badge-man';
+            const createdAt = row.createdAt ? new Date(row.createdAt).toLocaleString(locale) : '—';
+            const prodDate  = row.productionDate
+                ? row.productionDate.substring(6,8) + '/' + row.productionDate.substring(4,6) + '/' + row.productionDate.substring(0,4)
+                : '—';
+            const before = row.quantityBefore ?? 0;
+            const added  = row.quantityAdded  ?? 0;
+            const after  = row.quantityAfter  ?? 0;
+
+            return `
+            <div class="data-card">
+                <div class="data-card-top">
+                    <span class="data-card-op">${escHtml(row.operation ?? '—')}</span>
+                    <span class="data-card-id">#${row.id}</span>
+                </div>
+                <div class="data-card-body">
+                    <div class="data-card-field">
+                        <span class="data-card-label">${t('card_date')}</span>
+                        <span class="data-card-value">${prodDate}</span>
+                    </div>
+                    <div class="data-card-field">
+                        <span class="data-card-label">${t('card_type')}</span>
+                        <span class="data-card-value"><span class="badge ${typeBadge}">${escHtml(row.typeDisplay ?? '—')}</span></span>
+                    </div>
+                    <div class="data-card-field">
+                        <span class="data-card-label">${t('card_time_slot')}</span>
+                        <span class="data-card-value"><span class="time-pill">⏱ ${escHtml(row.timeSlot ?? '—')}</span></span>
+                    </div>
+                    <div class="data-card-field">
+                        <span class="data-card-label">${t('card_qty')}</span>
+                        <span class="data-card-value qty-added">+${fmtNum(added)}</span>
+                    </div>
+                    <div class="data-card-field">
+                        <span class="data-card-label">${t('card_before_after')}</span>
+                        <span class="data-card-value">${fmtNum(before)} <span class="arrow">→</span> <span class="qty-after">${fmtNum(after)}</span></span>
+                    </div>
+                    <div class="data-card-field full">
+                        <span class="data-card-label">${t('card_saved_at')}</span>
+                        <span class="data-card-value" style="font-size:.78rem;color:var(--gray-500)">${createdAt}</span>
+                    </div>
+                    ${row.note ? `<div class="data-card-field full"><span class="data-card-label">${t('card_note')}</span><span class="data-card-value">${escHtml(row.note)}</span></div>` : ''}
+                </div>
+            </div>`;
+        }).join('');
+
+        renderPagination(total, totalPages);
+    }
+
+    function renderPagination(total, totalPages) {
+        const bar = document.getElementById('paginationBar');
+        if (total === 0 || totalPages <= 1) { bar.style.display = 'none'; return; }
+        bar.style.display = 'flex';
+
+        const start = (currentPage - 1) * pageSize + 1;
+        const end   = Math.min(currentPage * pageSize, total);
+
+        const infoHtml = `<div class="pagination-info">${t('pg_showing')} <strong>${start}–${end}</strong> / <strong>${total}</strong> ${t('pg_records')} · ${t('pg_page')} <strong>${currentPage}/${totalPages}</strong></div>`;
+
+        const WING = 2;
+        let pages = [];
+        for (let p = 1; p <= totalPages; p++) {
+            if (p === 1 || p === totalPages || (p >= currentPage - WING && p <= currentPage + WING)) pages.push(p);
+            else if (p === currentPage - WING - 1 || p === currentPage + WING + 1) pages.push('…');
+        }
+        pages = pages.filter(function (v, i, a) { return !(v === '…' && a[i-1] === '…'); });
+
+        let btns = '';
+        btns += `<button class="pg-btn" onclick="renderPage(1)"                   ${currentPage===1         ?'disabled':''}>«</button>`;
+        btns += `<button class="pg-btn" onclick="renderPage(${currentPage-1})"    ${currentPage===1         ?'disabled':''}>‹</button>`;
+        pages.forEach(function (p) {
+            if (p === '…') btns += `<span class="pg-ellipsis">…</span>`;
+            else btns += `<button class="pg-btn ${p===currentPage?'pg-active':''}" onclick="renderPage(${p})">${p}</button>`;
+        });
+        btns += `<button class="pg-btn" onclick="renderPage(${currentPage+1})"    ${currentPage===totalPages?'disabled':''}>›</button>`;
+        btns += `<button class="pg-btn" onclick="renderPage(${totalPages})"       ${currentPage===totalPages?'disabled':''}>»</button>`;
+
+        bar.innerHTML = infoHtml + `<div class="pagination-controls">${btns}</div>`;
+    }
+
+    function onPageSizeChange() {
+        pageSize    = parseInt(document.getElementById('pageSizeSelect').value, 10);
+        currentPage = 1;
+        renderPage(1);
+    }
+
+    function clearFilters() {
+        document.getElementById('filterType').value      = '';
+        document.getElementById('filterOperation').value = '';
+        document.getElementById('filterTimeSlot').value  = '';
+        document.getElementById('filterDateFrom').value  = '';
+        document.getElementById('filterDateTo').value    = '';
+        loadData();
+    }
+
+    function fmtNum(v) { return Number(v).toLocaleString(); }
+    function escHtml(str) {
+        return String(str)
+            .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+            .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+</script>
+}
