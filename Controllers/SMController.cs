@@ -267,10 +267,10 @@ namespace SMInputProduction.Controllers
 
                 decimal[] Slots(SVN_Production_result_Viindoo? r)
                 {
-                    if (r == null) return new decimal[6];
+                    if (r == null) return new decimal[5];
                     return new[] { ParseDecimal(r.Time1), ParseDecimal(r.Time2),
                                    ParseDecimal(r.Time3), ParseDecimal(r.Time4),
-                                   ParseDecimal(r.Time5), ParseDecimal(r.Time6) };
+                                   ParseDecimal(r.Time5) };
                 }
 
                 var opResults = filteredOps.Select(op =>

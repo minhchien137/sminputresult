@@ -444,7 +444,9 @@
 
 @section Scripts {
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
 <script>
+    Chart.register(ChartDataLabels);
     const pathBase = '@Context.Request.PathBase'.replace(/\/$/, '');
     let reportData    = null;
     let hourlyChart   = null;
@@ -617,16 +619,16 @@
             if (hourlyChart) { hourlyChart.destroy(); hourlyChart = null; }
             return;
         }
-        const labels  = ['T1', 'T2', 'T3', 'T4', 'T5', 'T6'];
-        const actual  = [0,0,0,0,0,0];
-        const ngArr   = [0,0,0,0,0,0];
-        const tgtArr  = [0,0,0,0,0,0];
+        const labels  = ['8h-10h', '10h-12h', '12h30-15h30', '15h30-17h30', '18h30-21h'];
+        const actual  = [0,0,0,0,0];
+        const ngArr   = [0,0,0,0,0];
+        const tgtArr  = [0,0,0,0,0];
 
         ops.forEach(op => {
-            (op.hourlyData   || []).forEach((v, i) => { actual[i] += Number(v) || 0; });
-            (op.ngHourlyData || []).forEach((v, i) => { ngArr[i]  += Number(v) || 0; });
-            const slotTgt = Number(op.targetUPH) || (Number(op.targetQty) / 6) || 0;
-            for (let i = 0; i < 6; i++) tgtArr[i] += slotTgt;
+            (op.hourlyData   || []).forEach((v, i) => { if (i < 5) actual[i] += Number(v) || 0; });
+            (op.ngHourlyData || []).forEach((v, i) => { if (i < 5) ngArr[i]  += Number(v) || 0; });
+            const slotTgt = Number(op.targetUPH) || (Number(op.targetQty) / 5) || 0;
+            for (let i = 0; i < 5; i++) tgtArr[i] += slotTgt;
         });
 
         const ctx = document.getElementById('hourlyChart').getContext('2d');
@@ -640,35 +642,66 @@
                         type: 'bar', label: tr('rpt_actual','Actual'), data: actual,
                         backgroundColor: 'rgba(200,16,46,0.82)',
                         hoverBackgroundColor: 'rgba(155,11,34,0.9)',
-                        borderRadius: 5, borderSkipped: false, order: 2,
+                        borderRadius: 5, borderSkipped: false, order: 1,
+                        datalabels: {
+                            anchor: 'center', align: 'center',
+                            font: { weight: 'bold', size: 13 },
+                            color: 'white',
+                            display: ctx => Number(ctx.dataset.data[ctx.dataIndex]) > 0,
+                            backgroundColor: null, padding: 0
+                        }
+                    },
+                    {
+                        type: 'bar', label: tr('rpt_target','Target'), data: tgtArr,
+                        backgroundColor: 'rgba(100,116,139,0.25)',
+                        hoverBackgroundColor: 'rgba(100,116,139,0.45)',
+                        borderColor: '#64748b', borderWidth: 2,
+                        borderRadius: 4, borderSkipped: false, order: 2,
+                        datalabels: {
+                            anchor: 'center', align: 'center',
+                            font: { weight: 'bold', size: 12 },
+                            color: '#374151',
+                            display: ctx => Number(ctx.dataset.data[ctx.dataIndex]) > 0,
+                            backgroundColor: null, padding: 0
+                        }
                     },
                     {
                         type: 'bar', label: 'NG', data: ngArr,
                         backgroundColor: 'rgba(217,119,6,0.75)',
                         hoverBackgroundColor: 'rgba(180,83,9,0.9)',
                         borderRadius: 5, borderSkipped: false, order: 3,
-                    },
-                    {
-                        type: 'line', label: tr('rpt_target','Target'), data: tgtArr,
-                        borderColor: '#374151', borderWidth: 2.5,
-                        borderDash: [6, 4],
-                        pointBackgroundColor: '#374151', pointRadius: 4, pointHoverRadius: 6,
-                        fill: false, tension: 0.1, order: 1,
+                        datalabels: {
+                            anchor: 'center', align: 'center',
+                            font: { weight: 'bold', size: 11 },
+                            color: 'white',
+                            display: ctx => Number(ctx.dataset.data[ctx.dataIndex]) > 0,
+                            backgroundColor: null, padding: 0
+                        }
                     }
                 ]
             },
             options: {
                 responsive: true, maintainAspectRatio: false,
                 interaction: { mode: 'index', intersect: false },
+                layout: { padding: { top: 10 } },
                 plugins: {
-                    legend: { display: false },
+                    legend: {
+                        display: true,
+                        position: 'top',
+                        labels: {
+                            boxWidth: 14, boxHeight: 14,
+                            padding: 16,
+                            font: { size: 12 }
+                        }
+                    },
                     tooltip: {
                         backgroundColor: 'rgba(17,24,39,.92)',
                         padding: 10, cornerRadius: 8,
                         callbacks: {
                             label: ctx => '  ' + ctx.dataset.label + ': ' + Number(ctx.parsed.y).toLocaleString()
                         }
-                    }
+                    },
+                    datalabels: {}
                 },
                 scales: {
                     y: {
