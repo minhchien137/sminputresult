@@ -350,11 +350,11 @@
                     <label data-i18n="tbl_time">Time Slot</label>
                     <select id="filterTimeSlot">
                         <option value="" data-i18n="ph_all">-- All --</option>
-                        <option value="Time1">Time 1</option>
-                        <option value="Time2">Time 2</option>
-                        <option value="Time3">Time 3</option>
-                        <option value="Time4">Time 4</option>
-                        <option value="Time5">Time 5</option>
+                        <option value="Time1">Time 1 (8h - 10h)</option>
+                        <option value="Time2">Time 2 (10h - 12h)</option>
+                        <option value="Time3">Time 3 (12h30 - 15h30)</option>
+                        <option value="Time4">Time 4 (15h30 - 17h30)</option>
+                        <option value="Time5">Time 5 (18h30 - 21h)</option>
                     </select>
                 </div>
 
@@ -411,10 +411,11 @@
                         <th data-i18n="tbl_before">Before</th>
                         <th data-i18n="tbl_after">After</th>
                         <th data-i18n="tbl_saved">Saved At</th>
+                        <th data-i18n="tbl_description">Description</th>
                     </tr>
                 </thead>
                 <tbody id="tableBody">
-                    <tr><td colspan="8">
+                    <tr><td colspan="9">
                         <div class="loading-state"><div class="spinner"></div><p id="initLoadingText">Loading...</p></div>
                     </td></tr>
                 </tbody>
@@ -492,7 +493,7 @@
         const dateTo      = document.getElementById('filterDateTo').value;
 
         const loadingHTML = `<div class="loading-state"><div class="spinner"></div><p>${t('loading')}</p></div>`;
-        document.getElementById('tableBody').innerHTML   = `<tr><td colspan="8">${loadingHTML}</td></tr>`;
+        document.getElementById('tableBody').innerHTML   = `<tr><td colspan="9">${loadingHTML}</td></tr>`;
         document.getElementById('cardList').innerHTML    = loadingHTML;
         document.getElementById('paginationBar').style.display = 'none';
         document.getElementById('recordCount').textContent = t('loading');
@@ -513,7 +514,7 @@
         } catch (e) {
             console.error('GetInputHistory error:', e);
             const errHTML = `<div class="empty-state"><div class="empty-state-icon">⚠️</div><p>${t('load_err')}: ${escHtml(e.message)}</p></div>`;
-            document.getElementById('tableBody').innerHTML = `<tr><td colspan="8">${errHTML}</td></tr>`;
+            document.getElementById('tableBody').innerHTML = `<tr><td colspan="9">${errHTML}</td></tr>`;
             document.getElementById('cardList').innerHTML  = errHTML;
             document.getElementById('recordCount').textContent = t('load_err');
         }
@@ -538,7 +539,7 @@
 
         if (slice.length === 0) {
             const emptyHTML = `<div class="empty-state"><div class="empty-state-icon">📭</div><p>${t('no_data')}</p></div>`;
-            document.getElementById('tableBody').innerHTML = `<tr><td colspan="8">${emptyHTML}</td></tr>`;
+            document.getElementById('tableBody').innerHTML = `<tr><td colspan="9">${emptyHTML}</td></tr>`;
             document.getElementById('cardList').innerHTML  = emptyHTML;
             document.getElementById('paginationBar').style.display = 'none';
             return;
@@ -569,6 +570,7 @@
                 <td class="qty-before">${fmtNum(before)}</td>
                 <td class="qty-after">→ ${fmtNum(after)}</td>
                 <td class="td-date">${createdAt}</td>
+                <td class="td-note" title="${escHtml(row.description ?? '')}">${row.description ? escHtml(row.description) : '<span class=\'no-val\'>—</span>'}</td>
             </tr>`;
         }).join('');
 
@@ -615,6 +617,10 @@
                         <span class="data-card-label">${t('card_saved_at')}</span>
                         <span class="data-card-value" style="font-size:.78rem;color:var(--gray-500)">${createdAt}</span>
                     </div>
+                    ${row.description ? `<div class="data-card-field full">
+                        <span class="data-card-label">${t('card_description')}</span>
+                        <span class="data-card-value" style="font-size:.83rem;">${escHtml(row.description)}</span>
+                    </div>` : ''}
                 </div>
             </div>`;
         }).join('');

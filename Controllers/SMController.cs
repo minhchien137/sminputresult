@@ -120,7 +120,7 @@ namespace SMInputProduction.Controllers
                     Shift          = "day",
                     CreatedAt      = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, TimeZoneInfo.FindSystemTimeZoneById("China Standard Time")),
                     ClientIp       = clientIp,
-                    Note           = dto.Note
+                    Description    = dto.Description
                 });
                 await _context.SaveChangesAsync();
 
@@ -203,7 +203,7 @@ namespace SMInputProduction.Controllers
                         x.Shift,
                         x.CreatedAt,
                         x.ClientIp,
-                        x.Note
+                        x.Description
                     })
                     .ToListAsync();
 
@@ -374,11 +374,11 @@ namespace SMInputProduction.Controllers
 
         public class SaveResultDto
         {
-            public string?  TypeValue { get; set; }
-            public string?  Operation { get; set; }
-            public string?  TimeSlot  { get; set; }
-            public decimal? Quantity  { get; set; }
-            public string?  Note      { get; set; }
+            public string?  TypeValue   { get; set; }
+            public string?  Operation   { get; set; }
+            public string?  TimeSlot    { get; set; }
+            public decimal? Quantity    { get; set; }
+            public string?  Description { get; set; }
         }
     }
 }

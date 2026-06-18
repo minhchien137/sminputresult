@@ -67,6 +67,6 @@ namespace SMInputProduction.Models
         public string? ClientIp { get; set; }
 
         [MaxLength(500)]
-        public string? Note { get; set; }
+        public string? Description { get; set; }
     }
 }

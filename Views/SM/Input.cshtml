@@ -170,6 +170,26 @@
     input[type="number"]:hover { border-color: var(--red-mid); }
     .input-hint { font-size: 0.76rem; color: var(--gray-400); margin-top: 2px; }
 
+    textarea {
+        width: 100%;
+        padding: 0.72rem 1rem;
+        border: 1.5px solid var(--gray-200);
+        border-radius: 10px;
+        font-family: 'Inter', sans-serif;
+        font-size: 0.93rem;
+        color: var(--gray-900);
+        background: var(--white);
+        transition: all 0.2s;
+        outline: none;
+        resize: vertical;
+        min-height: 72px;
+    }
+    textarea:focus {
+        border-color: var(--red);
+        box-shadow: 0 0 0 3px rgba(200,16,46,0.1);
+    }
+    textarea:hover { border-color: var(--red-mid); }
+
     /* ── CURRENT VALUE BADGE ── */
     .current-badge {
         display: inline-flex;
@@ -540,6 +560,14 @@
                     <span class="input-hint" data-i18n="hint_qty">Enter non-negative integer</span>
                 </div>
 
+                <!-- DESCRIPTION (optional, full width) -->
+                <div class="form-group full">
+                    <label><span data-i18n="label_description">Description</span></label>
+                    <textarea id="descriptionInput" rows="2"
+                              data-i18n-ph="placeholder_description"
+                              placeholder="Optional description..."></textarea>
+                </div>
+
                 <!-- TIME SUMMARY: full width -->
                 <div class="form-group full" id="timeSummaryWrap" style="display:none;">
                     <div class="time-summary">
@@ -739,6 +767,11 @@
         const existing = _currentValues ? (_currentValues[key] ?? 0) : 0;
         const newTotal = existing + qty;
         const typeLabel = { 'Production Qty': 'Production Qty', 'Defect': 'Defect (NG_Qty)', 'Man Qty': "Man Qty (Man Q'ty)" };
+        const desc = (document.getElementById('descriptionInput').value || '').trim();
+
+        const descRow = desc
+            ? `<div class="modal-row"><span>${t.modal_desc || 'Description'}</span><span style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${desc.replace(/"/g,'&quot;')}">${desc}</span></div>`
+            : '';
 
         document.getElementById('modalSummary').innerHTML = `
             <div class="modal-row"><span>${t.modal_type || 'Type'}</span><span>${typeLabel[type] || type}</span></div>
@@ -746,6 +779,7 @@
             <div class="modal-row"><span>${t.modal_time || 'Time Slot'}</span><span>${time}</span></div>
             <div class="modal-row"><span>${t.modal_add  || 'Add'}</span><span>+ ${qty}</span></div>
             <div class="modal-row"><span>${t.modal_total|| 'Total after save'}</span><span>${newTotal}</span></div>
+            ${descRow}
         `;
         document.getElementById('confirmModal').classList.add('show');
     }
@@ -770,7 +804,7 @@
             const res = await fetch(`${pathBase}/SM/SaveResult`, {
                 method:  'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body:    JSON.stringify({ typeValue: type, operation: op, timeSlot: time, quantity: qty })
+                body:    JSON.stringify({ typeValue: type, operation: op, timeSlot: time, quantity: qty, description: document.getElementById('descriptionInput').value.trim() || null })
             });
             let result;
             const raw = await res.text();
@@ -810,7 +844,8 @@
         $('#typeSelect').val('').trigger('change');
         $('#operationSelect').val('').trigger('change');
         $('#timeSelect').val('').trigger('change');
-        document.getElementById('quantityInput').value = '';
+        document.getElementById('quantityInput').value    = '';
+        document.getElementById('descriptionInput').value = '';
         _currentValues = null;
         hideSummary();
         document.getElementById('currentBadge').classList.add('hidden');
