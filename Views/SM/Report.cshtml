@@ -15,7 +15,6 @@
         --gray-50:    #F9FAFB;
         --gray-100:   #F3F4F6;
         --gray-200:   #E5E7EB;
-        --gray-300:   #D1D5DB;
         --gray-400:   #9CA3AF;
         --gray-500:   #6B7280;
         --gray-600:   #4B5563;
@@ -25,26 +24,24 @@
         --green-bg:   #ECFDF5;
         --green-lt:   #D1FAE5;
         --amber:      #D97706;
-        --amber-bg:   #FFFBEB;
         --amber-lt:   #FEF3C7;
+        --blue:       #2563EB;
+        --blue-bg:    #EFF6FF;
+        --blue-lt:    #DBEAFE;
         --danger:     #DC2626;
         --shadow-sm:  0 1px 3px rgba(0,0,0,0.07);
         --shadow-md:  0 4px 16px rgba(0,0,0,0.09);
         --shadow-lg:  0 8px 32px rgba(0,0,0,0.12);
     }
 
-    body {
-        font-family: 'Inter', sans-serif;
-        background: var(--gray-50);
-        min-height: 100vh;
-    }
+    body { font-family:'Inter',sans-serif; background:var(--gray-50); min-height:100vh; }
 
     /* ── PAGE ── */
-    .rpt-page { max-width: 1440px; margin: 0 auto; padding: 1.5rem 1rem 3rem; }
-    @@media (min-width: 768px) { .rpt-page { padding: 2rem 1.5rem 3rem; } }
+    .rpt-page { max-width:1600px; margin:0 auto; padding:1.5rem 1rem 3rem; }
+    @@media (min-width:768px) { .rpt-page { padding:2rem 1.5rem 3rem; } }
 
     /* ── PAGE HEADER ── */
-    .rpt-header { margin-bottom: 1.5rem; display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
+    .rpt-header { margin-bottom:1.5rem; display:flex; align-items:flex-end; justify-content:space-between; flex-wrap:wrap; gap:12px; }
     .rpt-header-left h1 { font-family:'Barlow',sans-serif; font-size:1.65rem; font-weight:800; color:var(--red-dark); margin:0; }
     .rpt-header-left p  { color:var(--gray-500); font-size:0.85rem; margin-top:4px; }
     .rpt-header-right   { display:flex; align-items:center; gap:10px; }
@@ -54,30 +51,34 @@
         padding:0.5rem 1rem; border-radius:8px;
         background:var(--white); border:1.5px solid var(--gray-200);
         color:var(--gray-600); font-family:'Inter',sans-serif;
-        font-size:0.82rem; font-weight:600; cursor:pointer;
-        transition:all .2s;
+        font-size:0.82rem; font-weight:600; cursor:pointer; transition:all .2s;
     }
     .btn-refresh:hover { border-color:var(--red); color:var(--red); background:var(--red-xlight); }
 
     /* ── FILTER BAR ── */
     .filter-bar {
-        background:var(--white);
-        border-radius:14px;
+        background:var(--white); border-radius:14px;
         border:1px solid rgba(200,16,46,0.08);
-        box-shadow:var(--shadow-sm);
-        padding:1rem 1.25rem;
+        box-shadow:var(--shadow-sm); padding:1rem 1.25rem;
         margin-bottom:1.5rem;
         display:flex; flex-wrap:wrap; gap:1rem; align-items:flex-end;
     }
     .fb-group { display:flex; flex-direction:column; gap:5px; }
     .fb-group label { font-size:0.72rem; font-weight:700; color:var(--gray-600); text-transform:uppercase; letter-spacing:.4px; }
-    .fb-group input[type="date"] {
+    .fb-group input[type="date"],
+    .fb-select {
         padding:.55rem .85rem; border:1.5px solid var(--gray-200); border-radius:8px;
         font-family:'Inter',sans-serif; font-size:0.88rem; color:var(--gray-900);
         background:var(--white); outline:none; min-height:40px; cursor:pointer;
-        transition:border-color .2s;
+        transition:border-color .2s; appearance:none; -webkit-appearance:none;
     }
-    .fb-group input[type="date"]:focus { border-color:var(--red); box-shadow:0 0 0 3px rgba(200,16,46,0.1); }
+    .fb-select {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23C8102E' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+        background-repeat:no-repeat; background-position:right 10px center; padding-right:30px; min-width:140px;
+    }
+    .fb-group input[type="date"]:focus,
+    .fb-select:focus { border-color:var(--red); box-shadow:0 0 0 3px rgba(200,16,46,0.1); }
+
     .ops-dropdown-wrap { position:relative; }
     .ops-toggle-btn {
         display:inline-flex; align-items:center; gap:8px;
@@ -124,155 +125,107 @@
     }
     .fb-apply-btn:hover { transform:translateY(-1px); box-shadow:0 5px 16px rgba(200,16,46,.38); }
 
-    /* ── KPI GRID ── */
-    .kpi-grid {
-        display:grid;
-        grid-template-columns:repeat(2,1fr);
-        gap:1rem;
-        margin-bottom:1.5rem;
-    }
-    @@media (min-width:768px) { .kpi-grid { grid-template-columns:repeat(4,1fr); } }
-
-    .kpi-card {
-        background:var(--white); border-radius:16px;
-        border:1.5px solid var(--gray-200);
-        box-shadow:var(--shadow-sm);
-        padding:1.2rem 1.25rem;
-        position:relative; overflow:hidden;
-        transition:box-shadow .2s, transform .2s;
-    }
-    .kpi-card:hover { box-shadow:var(--shadow-md); transform:translateY(-2px); }
-    .kpi-card::before {
-        content:''; position:absolute; top:0; left:0; right:0; height:3px;
-        background:var(--gray-200); border-radius:16px 16px 0 0;
-    }
-    .kpi-card.good::before  { background:linear-gradient(90deg,var(--green),#34d399); }
-    .kpi-card.warn::before  { background:linear-gradient(90deg,var(--amber),#fbbf24); }
-    .kpi-card.bad::before   { background:linear-gradient(90deg,var(--red-dark),var(--red-mid)); }
-
-    .kpi-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:.75rem; }
-    .kpi-icon {
-        width:36px; height:36px; border-radius:10px;
-        display:flex; align-items:center; justify-content:center;
-        font-size:1.1rem; flex-shrink:0;
-        background:var(--gray-100);
-    }
-    .kpi-card.good .kpi-icon { background:var(--green-bg); }
-    .kpi-card.warn .kpi-icon { background:var(--amber-bg); }
-    .kpi-card.bad  .kpi-icon { background:var(--red-xlight); }
-
-    .kpi-status-badge {
-        font-size:.65rem; font-weight:700; padding:2px 8px; border-radius:20px;
-        background:var(--gray-100); color:var(--gray-500);
-        text-transform:uppercase; letter-spacing:.4px;
-    }
-    .kpi-card.good .kpi-status-badge { background:var(--green-lt); color:var(--green); }
-    .kpi-card.warn .kpi-status-badge { background:var(--amber-lt); color:var(--amber); }
-    .kpi-card.bad  .kpi-status-badge { background:var(--red-light); color:var(--red-dark); }
-
-    .kpi-label { font-size:.72rem; font-weight:700; color:var(--gray-500); text-transform:uppercase; letter-spacing:.4px; }
-    .kpi-value { font-family:'Barlow',sans-serif; font-size:2rem; font-weight:800; color:var(--gray-900); line-height:1.1; margin:.25rem 0; }
-    @@media (min-width:768px) { .kpi-value { font-size:2.3rem; } }
-    .kpi-card.good .kpi-value { color:var(--green); }
-    .kpi-card.warn .kpi-value { color:var(--amber); }
-    .kpi-card.bad  .kpi-value { color:var(--danger); }
-
-    .kpi-progress { height:5px; background:var(--gray-100); border-radius:3px; margin:.5rem 0 .4rem; overflow:hidden; }
-    .kpi-progress-fill { height:100%; border-radius:3px; width:0%; transition:width .7s cubic-bezier(.34,1,.64,1); background:var(--gray-300); }
-    .kpi-card.good .kpi-progress-fill { background:linear-gradient(90deg,var(--green),#34d399); }
-    .kpi-card.warn .kpi-progress-fill { background:linear-gradient(90deg,var(--amber),#fbbf24); }
-    .kpi-card.bad  .kpi-progress-fill { background:linear-gradient(90deg,var(--red-dark),var(--red-mid)); }
-
-    .kpi-sub { font-size:.75rem; color:var(--gray-400); font-weight:500; }
-
-    /* ── CHART CARD ── */
-    .chart-card {
+    /* ── SECTION CARD ── */
+    .section-card {
         background:var(--white); border-radius:16px;
         border:1px solid rgba(200,16,46,0.07);
         box-shadow:var(--shadow-sm); overflow:hidden;
-        margin-bottom:1.5rem;
     }
     .section-header {
         padding:.9rem 1.25rem; border-bottom:1px solid var(--gray-100);
         display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;
     }
     .section-title { font-family:'Barlow',sans-serif; font-size:.95rem; font-weight:700; color:var(--red-dark); margin:0; }
-    .chart-legend { display:flex; gap:14px; flex-wrap:wrap; }
+    .section-legend { display:flex; gap:14px; flex-wrap:wrap; }
     .legend-item { display:flex; align-items:center; gap:5px; font-size:.75rem; color:var(--gray-600); font-weight:500; }
     .legend-dot { width:10px; height:10px; border-radius:2px; }
-    .legend-dot.actual  { background:rgba(200,16,46,0.85); }
-    .legend-dot.ng      { background:rgba(217,119,6,0.8); }
-    .legend-dot.target  { background:#374151; border-radius:50%; }
-    .chart-body { padding:1.25rem; overflow-x:auto; -webkit-overflow-scrolling:touch; }
-    .chart-wrap { position:relative; min-width:360px; }
+    .legend-dot.prod { background:rgba(200,16,46,0.82); }
+    .legend-dot.ng   { background:rgba(217,119,6,0.75); }
+    .legend-dot.man  { background:rgba(37,99,235,0.75); }
 
-    /* ── TABLE CARD ── */
-    .table-card {
-        background:var(--white); border-radius:16px;
-        border:1px solid rgba(200,16,46,0.07);
-        box-shadow:var(--shadow-sm); overflow:hidden;
+    /* ── OPS GRID ── */
+    .ops-grid {
+        display:grid;
+        grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+        gap:1rem; padding:1.25rem;
     }
-    .table-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; }
-    table.rpt-table { width:100%; border-collapse:collapse; font-size:.85rem; min-width:680px; }
-    table.rpt-table thead { background:linear-gradient(135deg,var(--red-dark) 0%,var(--red-mid) 100%); }
-    table.rpt-table thead th {
-        padding:.8rem 1rem; text-align:left;
-        font-family:'Barlow',sans-serif; font-size:.71rem; font-weight:700;
-        color:rgba(255,255,255,0.9); letter-spacing:.5px; text-transform:uppercase; white-space:nowrap;
+    @@media (min-width:1400px) { .ops-grid { grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); } }
+
+    /* ── OPERATION CARD ── */
+    .op-card {
+        background:var(--white); border-radius:14px;
+        border:1.5px solid var(--gray-200);
+        box-shadow:0 1px 4px rgba(0,0,0,0.06);
+        overflow:hidden; position:relative;
+        transition:box-shadow .2s, transform .2s;
+        display:flex; flex-direction:column;
     }
-    table.rpt-table thead th:first-child { border-radius:0; }
-    table.rpt-table tbody tr { border-bottom:1px solid var(--gray-100); transition:background .15s; }
-    table.rpt-table tbody tr:hover { background:var(--red-xlight); }
-    table.rpt-table tbody tr:last-child { border-bottom:none; }
-    table.rpt-table tbody td { padding:.75rem 1rem; color:var(--gray-700); vertical-align:middle; }
-    .td-op { font-weight:600; color:var(--gray-900); white-space:nowrap; }
-    .td-num { font-weight:600; text-align:right; white-space:nowrap; }
-    .td-right { text-align:right; }
+    .op-card:hover { box-shadow:var(--shadow-md); transform:translateY(-2px); }
+    .op-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; }
+    .op-card.good::before { background:linear-gradient(90deg,var(--green),#34d399); }
+    .op-card.warn::before { background:linear-gradient(90deg,var(--amber),#fbbf24); }
+    .op-card.bad::before  { background:linear-gradient(90deg,var(--red-dark),var(--red-mid)); }
+    .op-card.nodata::before { background:var(--gray-200); }
 
-    /* Progress bar in table */
-    .achieve-cell { min-width:130px; }
-    .achieve-bar-wrap { display:flex; align-items:center; gap:8px; }
-    .achieve-bar { flex:1; height:7px; background:var(--gray-100); border-radius:4px; overflow:hidden; }
-    .achieve-bar-fill { height:100%; border-radius:4px; transition:width .6s cubic-bezier(.34,1,.64,1); }
-    .achieve-pct { font-size:.8rem; font-weight:700; white-space:nowrap; min-width:42px; text-align:right; }
-    .achieve-good .achieve-bar-fill { background:linear-gradient(90deg,var(--green),#34d399); }
-    .achieve-good .achieve-pct { color:var(--green); }
-    .achieve-warn .achieve-bar-fill { background:linear-gradient(90deg,var(--amber),#fbbf24); }
-    .achieve-warn .achieve-pct { color:var(--amber); }
-    .achieve-bad  .achieve-bar-fill { background:linear-gradient(90deg,var(--red-dark),var(--red-mid)); }
-    .achieve-bad  .achieve-pct { color:var(--danger); }
-
-    /* Defect badge */
-    .defect-badge {
-        display:inline-block; padding:2px 8px; border-radius:20px;
-        font-size:.74rem; font-weight:700; white-space:nowrap;
+    .op-card-header {
+        padding:.9rem 1rem .5rem;
+        display:flex; align-items:flex-start; justify-content:space-between; gap:8px;
     }
-    .defect-good { background:var(--green-lt); color:var(--green); }
-    .defect-warn { background:var(--amber-lt); color:var(--amber); }
-    .defect-bad  { background:var(--red-light); color:var(--red-dark); }
-
-    /* Labor cell */
-    .labor-ratio { font-size:.82rem; font-weight:600; }
-    .labor-ok   { color:var(--green); }
-    .labor-warn { color:var(--amber); }
-    .labor-bad  { color:var(--danger); }
-
-    /* ── MOBILE CARDS ── */
-    .mobile-cards { display:none; }
-    @@media (max-width:700px) {
-        table.rpt-table { display:none; }
-        .mobile-cards { display:block; }
+    .op-name {
+        font-family:'Barlow',sans-serif; font-size:.88rem; font-weight:700;
+        color:var(--gray-900); line-height:1.35; flex:1; word-break:break-word;
     }
-    .mob-card { border-bottom:1px solid var(--gray-100); padding:1rem 1.25rem; transition:background .15s; }
-    .mob-card:last-child { border-bottom:none; }
-    .mob-card:hover { background:var(--red-xlight); }
-    .mob-card-top { display:flex; justify-content:space-between; align-items:center; margin-bottom:.65rem; }
-    .mob-op  { font-weight:700; color:var(--red-dark); font-size:.92rem; }
-    .mob-grid { display:grid; grid-template-columns:1fr 1fr; gap:.35rem .75rem; }
-    .mob-field { display:flex; flex-direction:column; gap:2px; }
-    .mob-lbl { font-size:.66rem; font-weight:700; text-transform:uppercase; color:var(--gray-400); letter-spacing:.3px; }
-    .mob-val { font-size:.85rem; color:var(--gray-700); font-weight:500; }
-    .mob-full { grid-column:1/-1; }
+    .achieve-badge {
+        display:inline-flex; align-items:center;
+        padding:3px 9px; border-radius:20px;
+        font-size:.72rem; font-weight:700; white-space:nowrap; flex-shrink:0;
+    }
+    .achieve-badge.good   { background:var(--green-lt); color:var(--green); }
+    .achieve-badge.warn   { background:var(--amber-lt); color:var(--amber); }
+    .achieve-badge.bad    { background:var(--red-light); color:var(--red-dark); }
+    .achieve-badge.nodata { background:var(--gray-100); color:var(--gray-400); }
+
+    .op-card-chart { padding:0 .75rem; height:145px; }
+
+    /* ── MAN QTY STRIP ── */
+    .op-card-man {
+        display:flex; align-items:center; gap:6px;
+        padding:.4rem .85rem .3rem;
+        border-top:1px dashed var(--gray-200);
+        flex-wrap:wrap;
+    }
+    .man-label {
+        font-size:.6rem; font-weight:700; text-transform:uppercase;
+        letter-spacing:.3px; color:var(--blue); white-space:nowrap; flex-shrink:0;
+    }
+    .man-slots { display:flex; gap:4px; flex-wrap:wrap; }
+    .man-slot {
+        display:flex; flex-direction:column; align-items:center;
+        background:var(--blue-bg); border:1px solid var(--blue-lt);
+        border-radius:5px; padding:3px 7px; min-width:38px;
+    }
+    .man-slot-lbl { font-size:.55rem; font-weight:700; color:#93C5FD; letter-spacing:.2px; text-align:center; line-height:1.25; }
+    .man-slot-val { font-size:.78rem; font-weight:700; color:var(--blue); margin-top:1px; }
+    .man-slot.empty { background:var(--gray-50); border-color:var(--gray-200); }
+    .man-slot.empty .man-slot-lbl { color:var(--gray-400); }
+    .man-slot.empty .man-slot-val { color:var(--gray-400); }
+
+    /* ── STATS ROW ── */
+    .op-card-stats {
+        display:grid; grid-template-columns:repeat(4,1fr);
+        border-top:1px solid var(--gray-100); margin-top:auto;
+    }
+    .stat-item {
+        display:flex; flex-direction:column; align-items:center;
+        padding:.55rem .3rem; gap:2px;
+        border-right:1px solid var(--gray-100);
+    }
+    .stat-item:last-child { border-right:none; }
+    .stat-lbl { font-size:.6rem; font-weight:700; text-transform:uppercase; letter-spacing:.3px; color:var(--gray-400); }
+    .stat-val { font-family:'Barlow',sans-serif; font-size:.95rem; font-weight:800; color:var(--gray-900); }
+    .stat-val.green { color:var(--green); }
+    .stat-val.amber { color:var(--amber); }
+    .stat-val.red   { color:var(--danger); }
 
     /* ── EMPTY / LOADING ── */
     .state-box { text-align:center; padding:3rem 1.5rem; color:var(--gray-400); }
@@ -281,14 +234,9 @@
     .spinner {
         width:32px; height:32px;
         border:3px solid var(--red-light); border-top-color:var(--red);
-        border-radius:50%; animation:spin .8s linear infinite;
-        margin:0 auto .9rem;
+        border-radius:50%; animation:spin .8s linear infinite; margin:0 auto .9rem;
     }
     @@keyframes spin { to { transform:rotate(360deg); } }
-
-    /* ── SKELETON PULSE ── */
-    .skeleton { background:linear-gradient(90deg,var(--gray-100) 25%,var(--gray-200) 50%,var(--gray-100) 75%); background-size:200% 100%; animation:shimmer 1.5s infinite; border-radius:8px; }
-    @@keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
 </style>
 }
 
@@ -333,110 +281,39 @@
             </div>
         </div>
 
+        <div class="fb-group">
+            <label data-i18n="rpt_data_show">Data Show</label>
+            <select class="fb-select" id="dataShowFilter" onchange="applyDataShowFilter()">
+                <option value="has"  data-i18n="rpt_data_has">Has Data</option>
+                <option value="all"  data-i18n="rpt_data_all" selected>All</option>
+                <option value="no"   data-i18n="rpt_data_no">No Data</option>
+            </select>
+        </div>
+
         <div class="fb-group" style="justify-content:flex-end;">
             <label style="visibility:hidden">‎</label>
             <button class="fb-apply-btn" onclick="loadReport()" data-i18n="rpt_apply">Apply</button>
         </div>
     </div>
 
-    <!-- KPI CARDS -->
-    <div class="kpi-grid">
-        <div class="kpi-card" id="kpiAchieve">
-            <div class="kpi-top">
-                <div class="kpi-icon">🎯</div>
-                <span class="kpi-status-badge" id="kpiAchieveStatus">—</span>
-            </div>
-            <div class="kpi-label" data-i18n="rpt_kpi_achieve">Achievement</div>
-            <div class="kpi-value" id="kpiAchieveVal">—</div>
-            <div class="kpi-progress"><div class="kpi-progress-fill" id="kpiAchieveBar"></div></div>
-            <div class="kpi-sub" id="kpiAchieveSub">—</div>
-        </div>
-
-        <div class="kpi-card" id="kpiDefect">
-            <div class="kpi-top">
-                <div class="kpi-icon">⚠️</div>
-                <span class="kpi-status-badge" id="kpiDefectStatus">—</span>
-            </div>
-            <div class="kpi-label" data-i18n="rpt_kpi_defect">Defect Rate</div>
-            <div class="kpi-value" id="kpiDefectVal">—</div>
-            <div class="kpi-progress"><div class="kpi-progress-fill" id="kpiDefectBar"></div></div>
-            <div class="kpi-sub" id="kpiDefectSub">—</div>
-        </div>
-
-        <div class="kpi-card" id="kpiUPH">
-            <div class="kpi-top">
-                <div class="kpi-icon">⚡</div>
-                <span class="kpi-status-badge" id="kpiUPHStatus">—</span>
-            </div>
-            <div class="kpi-label" data-i18n="rpt_kpi_uph">UPH</div>
-            <div class="kpi-value" id="kpiUPHVal">—</div>
-            <div class="kpi-progress"><div class="kpi-progress-fill" id="kpiUPHBar"></div></div>
-            <div class="kpi-sub" id="kpiUPHSub">—</div>
-        </div>
-
-        <div class="kpi-card" id="kpiLabor">
-            <div class="kpi-top">
-                <div class="kpi-icon">👥</div>
-                <span class="kpi-status-badge" id="kpiLaborStatus">—</span>
-            </div>
-            <div class="kpi-label" data-i18n="rpt_kpi_labor">Labor</div>
-            <div class="kpi-value" id="kpiLaborVal">—</div>
-            <div class="kpi-progress"><div class="kpi-progress-fill" id="kpiLaborBar"></div></div>
-            <div class="kpi-sub" id="kpiLaborSub">—</div>
-        </div>
-    </div>
-
-    <!-- HOURLY CHART -->
-    <div class="chart-card">
-        <div class="section-header">
-            <h3 class="section-title" data-i18n="rpt_chart_title">📈 Hourly Production</h3>
-            <div class="chart-legend">
-                <div class="legend-item"><div class="legend-dot actual"></div><span data-i18n="rpt_actual">Actual</span></div>
-                <div class="legend-item"><div class="legend-dot ng"></div>NG</div>
-                <div class="legend-item"><div class="legend-dot target" style="width:18px;height:3px;border-radius:2px;background:#374151;"></div><span data-i18n="rpt_target">Target</span></div>
-            </div>
-        </div>
-        <div class="chart-body">
-            <div class="chart-wrap">
-                <canvas id="hourlyChart" height="280"></canvas>
-            </div>
-        </div>
-    </div>
-
-    <!-- PER-OPERATION TABLE -->
-    <div class="table-card">
+    <!-- OPERATIONS GRID -->
+    <div class="section-card">
         <div class="section-header">
             <h3 class="section-title" data-i18n="rpt_tbl_title">📋 Per-Operation Summary</h3>
-            <span id="opCount" style="font-size:.78rem;color:var(--gray-400);"></span>
+            <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+                <div class="section-legend">
+                    <div class="legend-item"><div class="legend-dot prod"></div><span data-i18n="rpt_actual">Actual</span></div>
+                    <div class="legend-item"><div class="legend-dot ng"></div>NG</div>
+                    <div class="legend-item"><div class="legend-dot man"></div><span data-i18n="rpt_man_qty">Man Qty</span></div>
+                </div>
+                <span id="opCount" style="font-size:.78rem;color:var(--gray-400);"></span>
+            </div>
         </div>
-
-        <!-- Desktop -->
-        <div class="table-wrap">
-            <table class="rpt-table">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th data-i18n="rpt_tbl_op">Operation</th>
-                        <th data-i18n="rpt_tbl_plan" class="td-right">Daily Plan</th>
-                        <th data-i18n="rpt_tbl_actual" class="td-right">Actual</th>
-                        <th data-i18n="rpt_tbl_achieve">Achieve %</th>
-                        <th data-i18n="rpt_tbl_ng" class="td-right">NG Qty</th>
-                        <th data-i18n="rpt_tbl_defect">Defect %</th>
-                        <th data-i18n="rpt_tbl_labor">Labor (A/T)</th>
-                        <th data-i18n="rpt_tbl_uph">UPH (A/T)</th>
-                    </tr>
-                </thead>
-                <tbody id="opTableBody">
-                    <tr><td colspan="9">
-                        <div class="state-box"><div class="spinner"></div><p class="state-text" data-i18n="rpt_loading">Loading report...</p></div>
-                    </td></tr>
-                </tbody>
-            </table>
-        </div>
-
-        <!-- Mobile cards -->
-        <div class="mobile-cards" id="opMobileCards">
-            <div class="state-box"><div class="spinner"></div></div>
+        <div class="ops-grid" id="opsGrid">
+            <div class="state-box" style="grid-column:1/-1">
+                <div class="spinner"></div>
+                <p class="state-text" data-i18n="rpt_loading">Loading report...</p>
+            </div>
         </div>
     </div>
 
@@ -448,358 +325,282 @@
 <script>
     Chart.register(ChartDataLabels);
     const pathBase = '@Context.Request.PathBase'.replace(/\/$/, '');
-    let reportData    = null;
-    let hourlyChart   = null;
-    let allOpsAvail   = [];
-    let selectedOps   = new Set();
+    let reportData     = null;
+    let opCharts       = [];
+    let allOpsAvail    = [];
+    let selectedOps    = new Set();
     let opsInitialized = false;
 
-    // ── i18n helper ───────────────────────────────────────────────────────────
     function tr(key, fallback) {
         try { return I18N[currentLang][key] || fallback || key; } catch { return fallback || key; }
     }
+    function fmt(v) { return Number(v || 0).toLocaleString(); }
+    function escH(s) {
+        return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
 
-    // ── Status helpers ────────────────────────────────────────────────────────
+    // ── Status helpers ───────────────────────────────────────────────────────
     function achStatus(pct) { return pct >= 90 ? 'good' : pct >= 70 ? 'warn' : 'bad'; }
     function defStatus(pct) { return pct <= 2  ? 'good' : pct <= 5  ? 'warn' : 'bad'; }
-    function ratioStatus(actual, target) {
-        if (!target) return '';
-        const r = actual / target;
-        return r >= 0.9 ? 'good' : r >= 0.75 ? 'warn' : 'bad';
-    }
-    function statusLabel(s) {
-        const map = { good: tr('rpt_on_target','On Target'), warn: tr('rpt_warning','Warning'), bad: tr('rpt_below','Below Target'), '': '—' };
-        return map[s] || '—';
+    function hasData(op)    { return Number(op.actualQty) > 0; }
+
+    // ── Data Show filter (client-side re-render) ──────────────────────────────
+    function applyDataShowFilter() {
+        if (reportData) renderOpsGrid(reportData.operations);
     }
 
-    // ── Ops dropdown ──────────────────────────────────────────────────────────
+    // ── Ops dropdown ─────────────────────────────────────────────────────────
     function toggleOpsPanel() {
         const panel = document.getElementById('opsPanel');
         const btn   = document.getElementById('opsToggleBtn');
         const open  = panel.classList.toggle('open');
         btn.classList.toggle('open', open);
     }
-    document.addEventListener('click', function (e) {
+    document.addEventListener('click', function(e) {
         if (!e.target.closest('.ops-dropdown-wrap')) {
             document.getElementById('opsPanel').classList.remove('open');
             document.getElementById('opsToggleBtn').classList.remove('open');
         }
     });
-
     function buildOpsPanel(ops) {
-        const list = document.getElementById('opsList');
-        list.innerHTML = ops.map(op => `
-            <label class="ops-item">
+        document.getElementById('opsList').innerHTML = ops.map(function(op) {
+            return `<label class="ops-item">
                 <input type="checkbox" value="${escH(op)}" ${selectedOps.has(op) ? 'checked' : ''}
                        onchange="toggleOp('${escH(op)}', this.checked)" />
                 ${escH(op)}
-            </label>`).join('');
+            </label>`;
+        }).join('');
         updateOpsLabel();
     }
-
-    function toggleOp(op, checked) {
-        if (checked) selectedOps.add(op); else selectedOps.delete(op);
-        updateOpsLabel();
-    }
-
+    function toggleOp(op, checked) { if (checked) selectedOps.add(op); else selectedOps.delete(op); updateOpsLabel(); }
     function selectAllOps() {
         selectedOps = new Set(allOpsAvail);
-        document.querySelectorAll('#opsList input[type="checkbox"]').forEach(cb => cb.checked = true);
+        document.querySelectorAll('#opsList input[type="checkbox"]').forEach(function(cb) { cb.checked = true; });
         updateOpsLabel();
     }
-
     function clearAllOps() {
         selectedOps.clear();
-        document.querySelectorAll('#opsList input[type="checkbox"]').forEach(cb => cb.checked = false);
+        document.querySelectorAll('#opsList input[type="checkbox"]').forEach(function(cb) { cb.checked = false; });
         updateOpsLabel();
     }
-
     function updateOpsLabel() {
         const lbl = document.getElementById('opsLabel');
-        if (selectedOps.size === 0 || selectedOps.size === allOpsAvail.length) {
-            lbl.textContent = tr('rpt_all_ops', 'All Operations');
-        } else {
-            lbl.textContent = selectedOps.size + ' ' + tr('rpt_ops_selected', 'selected');
-        }
+        lbl.textContent = (selectedOps.size === 0 || selectedOps.size === allOpsAvail.length)
+            ? tr('rpt_all_ops','All Operations')
+            : selectedOps.size + ' ' + tr('rpt_ops_selected','selected');
     }
 
-    // ── Main load ─────────────────────────────────────────────────────────────
+    // ── Load ─────────────────────────────────────────────────────────────────
     async function loadReport() {
         const dateVal = document.getElementById('dateFilter').value;
         const opsVal  = (selectedOps.size > 0 && selectedOps.size < allOpsAvail.length)
                         ? [...selectedOps].join(',') : '';
-
-        setLoading(true);
         try {
-            const url = `${pathBase}/SM/GetReportData?date=${encodeURIComponent(dateVal)}&ops=${encodeURIComponent(opsVal)}`;
-            const res = await fetch(url);
+            const res = await fetch(`${pathBase}/SM/GetReportData?date=${encodeURIComponent(dateVal)}&ops=${encodeURIComponent(opsVal)}`);
             if (!res.ok) throw new Error('HTTP ' + res.status);
             reportData = await res.json();
 
-            // First load: init op list
             if (!opsInitialized) {
                 allOpsAvail = reportData.availableOps || [];
                 selectedOps = new Set(allOpsAvail);
                 buildOpsPanel(allOpsAvail);
                 opsInitialized = true;
             }
-
-            renderKPIs(reportData.summary);
-            renderChart(reportData.operations);
-            renderTable(reportData.operations);
-
-            const now = new Date();
+            renderOpsGrid(reportData.operations);
             document.getElementById('lastUpdated').textContent =
-                tr('rpt_updated', 'Updated') + ': ' + now.toLocaleTimeString();
+                tr('rpt_updated','Updated') + ': ' + new Date().toLocaleTimeString();
         } catch (e) {
             console.error('loadReport error:', e);
-            setErrorState(e.message);
-        } finally {
-            setLoading(false);
+            destroyOpCharts();
+            document.getElementById('opsGrid').innerHTML =
+                `<div class="state-box" style="grid-column:1/-1"><div class="state-icon">⚠️</div><p class="state-text">${tr('rpt_error','Error')}: ${escH(e.message)}</p></div>`;
         }
     }
 
-    function setLoading(on) {
-        // nothing to toggle globally; individual sections handle their own state
+    // ── Ops grid ─────────────────────────────────────────────────────────────
+    function destroyOpCharts() {
+        opCharts.forEach(function(c) { try { c.destroy(); } catch {} });
+        opCharts = [];
     }
 
-    function setErrorState(msg) {
-        const errHTML = `<div class="state-box"><div class="state-icon">⚠️</div><p class="state-text">${tr('rpt_error','Error')}: ${escH(msg)}</p></div>`;
-        document.getElementById('opTableBody').innerHTML = `<tr><td colspan="9">${errHTML}</td></tr>`;
-        document.getElementById('opMobileCards').innerHTML = errHTML;
-    }
+    function renderOpsGrid(ops) {
+        destroyOpCharts();
+        const grid      = document.getElementById('opsGrid');
+        const count     = document.getElementById('opCount');
+        const showMode  = document.getElementById('dataShowFilter').value; // all | has | no
 
-    // ── KPI cards ─────────────────────────────────────────────────────────────
-    function renderKPIs(s) {
-        if (!s) return;
-        // Achievement
-        setKPI('kpiAchieve', {
-            value:  s.ovAchieve + '%',
-            sub:    fmt(s.totActual) + ' / ' + fmt(s.totTarget) + ' pcs',
-            pct:    s.ovAchieve,
-            status: achStatus(s.ovAchieve),
-        });
-        // Defect
-        setKPI('kpiDefect', {
-            value:  s.ovDefect + '%',
-            sub:    fmt(s.totNG) + ' NG pcs',
-            pct:    Math.min(s.ovDefect * 20, 100), // visual scale
-            status: defStatus(s.ovDefect),
-        });
-        // UPH
-        setKPI('kpiUPH', {
-            value:  fmt(s.avgAUPH),
-            sub:    tr('rpt_target','Target') + ': ' + fmt(s.avgTUPH),
-            pct:    s.avgTUPH > 0 ? Math.min(s.avgAUPH / s.avgTUPH * 100, 100) : 0,
-            status: ratioStatus(s.avgAUPH, s.avgTUPH),
-        });
-        // Labor
-        setKPI('kpiLabor', {
-            value:  fmt(s.totALabor),
-            sub:    tr('rpt_target','Target') + ': ' + fmt(s.totTLabor),
-            pct:    s.totTLabor > 0 ? Math.min(s.totALabor / s.totTLabor * 100, 100) : 0,
-            status: ratioStatus(s.totALabor, s.totTLabor),
-        });
-    }
-
-    function setKPI(id, opts) {
-        const card   = document.getElementById(id);
-        const status = opts.status || '';
-        card.className = 'kpi-card' + (status ? ' ' + status : '');
-        card.querySelector('.kpi-value').textContent         = opts.value;
-        card.querySelector('.kpi-sub').textContent           = opts.sub;
-        card.querySelector('.kpi-progress-fill').style.width = Math.min(opts.pct || 0, 100) + '%';
-        const badge = card.querySelector('.kpi-status-badge');
-        badge.textContent = statusLabel(status);
-    }
-
-    // ── Chart ─────────────────────────────────────────────────────────────────
-    function renderChart(ops) {
-        if (!ops || ops.length === 0) {
-            if (hourlyChart) { hourlyChart.destroy(); hourlyChart = null; }
-            return;
-        }
-        const labels  = ['8h-10h', '10h-12h', '12h30-15h30', '15h30-17h30', '18h30-21h'];
-        const actual  = [0,0,0,0,0];
-        const ngArr   = [0,0,0,0,0];
-        const tgtArr  = [0,0,0,0,0];
-
-        ops.forEach(op => {
-            (op.hourlyData   || []).forEach((v, i) => { if (i < 5) actual[i] += Number(v) || 0; });
-            (op.ngHourlyData || []).forEach((v, i) => { if (i < 5) ngArr[i]  += Number(v) || 0; });
-            const slotTgt = Number(op.targetUPH) || (Number(op.targetQty) / 5) || 0;
-            for (let i = 0; i < 5; i++) tgtArr[i] += slotTgt;
+        // Apply Data Show filter
+        const filtered = (ops || []).filter(function(op) {
+            if (showMode === 'has') return hasData(op);
+            if (showMode === 'no')  return !hasData(op);
+            return true;
         });
 
-        const ctx = document.getElementById('hourlyChart').getContext('2d');
-        if (hourlyChart) hourlyChart.destroy();
-
-        hourlyChart = new Chart(ctx, {
-            data: {
-                labels,
-                datasets: [
-                    {
-                        type: 'bar', label: tr('rpt_actual','Actual'), data: actual,
-                        backgroundColor: 'rgba(200,16,46,0.82)',
-                        hoverBackgroundColor: 'rgba(155,11,34,0.9)',
-                        borderRadius: 5, borderSkipped: false, order: 1,
-                        datalabels: {
-                            anchor: 'center', align: 'center',
-                            font: { weight: 'bold', size: 13 },
-                            color: 'white',
-                            display: ctx => Number(ctx.dataset.data[ctx.dataIndex]) > 0,
-                            backgroundColor: null, padding: 0
-                        }
-                    },
-                    {
-                        type: 'bar', label: tr('rpt_target','Target'), data: tgtArr,
-                        backgroundColor: 'rgba(100,116,139,0.25)',
-                        hoverBackgroundColor: 'rgba(100,116,139,0.45)',
-                        borderColor: '#64748b', borderWidth: 2,
-                        borderRadius: 4, borderSkipped: false, order: 2,
-                        datalabels: {
-                            anchor: 'center', align: 'center',
-                            font: { weight: 'bold', size: 12 },
-                            color: '#374151',
-                            display: ctx => Number(ctx.dataset.data[ctx.dataIndex]) > 0,
-                            backgroundColor: null, padding: 0
-                        }
-                    },
-                    {
-                        type: 'bar', label: 'NG', data: ngArr,
-                        backgroundColor: 'rgba(217,119,6,0.75)',
-                        hoverBackgroundColor: 'rgba(180,83,9,0.9)',
-                        borderRadius: 5, borderSkipped: false, order: 3,
-                        datalabels: {
-                            anchor: 'center', align: 'center',
-                            font: { weight: 'bold', size: 11 },
-                            color: 'white',
-                            display: ctx => Number(ctx.dataset.data[ctx.dataIndex]) > 0,
-                            backgroundColor: null, padding: 0
-                        }
-                    }
-                ]
-            },
-            options: {
-                responsive: true, maintainAspectRatio: false,
-                interaction: { mode: 'index', intersect: false },
-                layout: { padding: { top: 10 } },
-                plugins: {
-                    legend: {
-                        display: true,
-                        position: 'top',
-                        labels: {
-                            boxWidth: 14, boxHeight: 14,
-                            padding: 16,
-                            font: { size: 12 }
-                        }
-                    },
-                    tooltip: {
-                        backgroundColor: 'rgba(17,24,39,.92)',
-                        padding: 10, cornerRadius: 8,
-                        callbacks: {
-                            label: ctx => '  ' + ctx.dataset.label + ': ' + Number(ctx.parsed.y).toLocaleString()
-                        }
-                    },
-                    datalabels: {}
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        grid: { color: 'rgba(0,0,0,0.04)' },
-                        ticks: { callback: v => Number(v).toLocaleString(), font: { size: 11 } }
-                    },
-                    x: {
-                        grid: { display: false },
-                        ticks: { font: { size: 12, weight: '600' } }
-                    }
-                },
-                animation: { duration: 600, easing: 'easeOutCubic' }
-            }
-        });
-    }
-
-    // ── Table ─────────────────────────────────────────────────────────────────
-    function renderTable(ops) {
-        const count = document.getElementById('opCount');
-        if (!ops || ops.length === 0) {
-            const emptyHTML = `<div class="state-box"><div class="state-icon">📭</div><p class="state-text">${tr('rpt_no_data','No data for selected filters')}</p></div>`;
-            document.getElementById('opTableBody').innerHTML = `<tr><td colspan="9">${emptyHTML}</td></tr>`;
-            document.getElementById('opMobileCards').innerHTML = emptyHTML;
+        if (filtered.length === 0) {
+            const msg = showMode === 'no'
+                ? tr('rpt_no_empty_ops', 'All operations have data')
+                : tr('rpt_no_data', 'No data for selected filters');
+            grid.innerHTML = `<div class="state-box" style="grid-column:1/-1"><div class="state-icon">📭</div><p class="state-text">${msg}</p></div>`;
             if (count) count.textContent = '';
             return;
         }
-        if (count) count.textContent = ops.length + ' operations';
+        if (count) count.textContent = filtered.length + ' / ' + (ops || []).length + ' operations';
 
-        // Desktop rows
-        document.getElementById('opTableBody').innerHTML = ops.map((op, i) => {
-            const aStatus = achStatus(op.achieveRate);
-            const dClass  = defStatus(op.defectRate) === 'good' ? 'defect-good' : defStatus(op.defectRate) === 'warn' ? 'defect-warn' : 'defect-bad';
-            const lClass  = ratioStatus(op.actualLabor, op.targetLabor);
-            const lStyle  = lClass === 'good' ? 'labor-ok' : lClass === 'warn' ? 'labor-warn' : 'labor-bad';
+        const slotDef = [
+            { top: '8',     bot: '10h',   hint: '8 - 10h' },
+            { top: '10',    bot: '12h',   hint: '10 - 12h' },
+            { top: '12:30', bot: '15:30h',hint: '12:30 - 15:30h' },
+            { top: '15:30', bot: '17:30h',hint: '15:30 - 17:30h' },
+            { top: '18:30', bot: '21h',   hint: '18:30 - 21h' },
+        ];
+        const timeLabels = slotDef.map(function(s) { return [s.top, s.bot]; });
+        const timeHints  = slotDef.map(function(s) { return s.hint; });
 
-            return `<tr>
-                <td style="color:var(--gray-400);font-size:.76rem;font-weight:600;">${i+1}</td>
-                <td class="td-op">${escH(op.operation)}</td>
-                <td class="td-num">${fmt(op.targetQty)}</td>
-                <td class="td-num">${fmt(op.actualQty)}</td>
-                <td class="achieve-cell">
-                    <div class="achieve-bar-wrap achieve-${aStatus}">
-                        <div class="achieve-bar"><div class="achieve-bar-fill" style="width:${Math.min(op.achieveRate,100)}%"></div></div>
-                        <span class="achieve-pct">${op.achieveRate}%</span>
+        grid.innerHTML = filtered.map(function(op, i) {
+            const nd  = !hasData(op);
+            const st  = nd ? 'nodata' : achStatus(op.achieveRate);
+            const dst = defStatus(op.defectRate);
+            const dCol = dst === 'good' ? 'green' : dst === 'warn' ? 'amber' : 'red';
+            const ngCol = Number(op.ngQty) > 0 ? 'amber' : '';
+
+            // Man Qty slots
+            const manData = (op.manHourlyData || []).slice(0, 5).map(Number);
+            const manSlots = slotDef.map(function(s, ti) {
+                const v   = manData[ti] || 0;
+                const cls = v > 0 ? '' : 'empty';
+                return `<div class="man-slot ${cls}"><span class="man-slot-lbl">${s.top}<br>${s.bot}</span><span class="man-slot-val">${v > 0 ? v : '—'}</span></div>`;
+            }).join('');
+
+            const badgeTxt = nd ? (tr('rpt_data_no','No Data')) : (op.achieveRate + '%');
+
+            return `
+            <div class="op-card ${st}">
+                <div class="op-card-header">
+                    <span class="op-name">${escH(op.operation)}</span>
+                    <span class="achieve-badge ${st}">${badgeTxt}</span>
+                </div>
+                <div class="op-card-chart">
+                    <canvas id="opChart_${i}"></canvas>
+                </div>
+                <div class="op-card-man">
+                    <span class="man-label">👥 ${tr('rpt_man_qty','Man Qty')}</span>
+                    <div class="man-slots">${manSlots}</div>
+                </div>
+                <div class="op-card-stats">
+                    <div class="stat-item">
+                        <span class="stat-lbl">${tr('rpt_tbl_actual','Actual')}</span>
+                        <span class="stat-val">${fmt(op.actualQty)}</span>
                     </div>
-                </td>
-                <td class="td-num">${fmt(op.ngQty)}</td>
-                <td><span class="defect-badge ${dClass}">${op.defectRate}%</span></td>
-                <td><span class="labor-ratio ${lStyle}">${fmt(op.actualLabor)} / ${fmt(op.targetLabor)}</span></td>
-                <td style="font-size:.82rem;font-weight:600;color:var(--gray-700);">${fmt(op.actualUPH)} / ${fmt(op.targetUPH)}</td>
-            </tr>`;
-        }).join('');
-
-        // Mobile cards
-        document.getElementById('opMobileCards').innerHTML = ops.map(op => {
-            const aStatus = achStatus(op.achieveRate);
-            const dClass  = defStatus(op.defectRate) === 'good' ? 'defect-good' : defStatus(op.defectRate) === 'warn' ? 'defect-warn' : 'defect-bad';
-            const lClass  = ratioStatus(op.actualLabor, op.targetLabor);
-            const lStyle  = lClass === 'good' ? 'labor-ok' : lClass === 'warn' ? 'labor-warn' : 'labor-bad';
-
-            return `<div class="mob-card">
-                <div class="mob-card-top">
-                    <span class="mob-op">${escH(op.operation)}</span>
-                    <span class="achieve-pct achieve-${aStatus}">${op.achieveRate}%</span>
-                </div>
-                <div class="achieve-bar-wrap achieve-${aStatus}" style="margin-bottom:.75rem;">
-                    <div class="achieve-bar" style="height:6px;"><div class="achieve-bar-fill" style="width:${Math.min(op.achieveRate,100)}%"></div></div>
-                </div>
-                <div class="mob-grid">
-                    <div class="mob-field"><span class="mob-lbl">${tr('rpt_tbl_plan','Plan')}</span><span class="mob-val">${fmt(op.targetQty)}</span></div>
-                    <div class="mob-field"><span class="mob-lbl">${tr('rpt_tbl_actual','Actual')}</span><span class="mob-val">${fmt(op.actualQty)}</span></div>
-                    <div class="mob-field"><span class="mob-lbl">NG Qty</span><span class="mob-val">${fmt(op.ngQty)}</span></div>
-                    <div class="mob-field"><span class="mob-lbl">${tr('rpt_tbl_defect','Defect')}</span><span class="mob-val"><span class="defect-badge ${dClass}">${op.defectRate}%</span></span></div>
-                    <div class="mob-field"><span class="mob-lbl">${tr('rpt_tbl_labor','Labor')}</span><span class="mob-val ${lStyle}">${fmt(op.actualLabor)} / ${fmt(op.targetLabor)}</span></div>
-                    <div class="mob-field"><span class="mob-lbl">UPH</span><span class="mob-val">${fmt(op.actualUPH)} / ${fmt(op.targetUPH)}</span></div>
+                    <div class="stat-item">
+                        <span class="stat-lbl">${tr('rpt_tbl_plan','Plan')}</span>
+                        <span class="stat-val">${fmt(op.targetQty)}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-lbl">NG</span>
+                        <span class="stat-val ${ngCol}">${fmt(op.ngQty)}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-lbl">${tr('rpt_tbl_defect','Defect')}</span>
+                        <span class="stat-val ${nd ? '' : dCol}">${nd ? '—' : op.defectRate + '%'}</span>
+                    </div>
                 </div>
             </div>`;
         }).join('');
+
+        // Create per-op charts
+        filtered.forEach(function(op, i) {
+            const canvas = document.getElementById('opChart_' + i);
+            if (!canvas) return;
+            const prodData = (op.hourlyData   || []).slice(0, 5).map(Number);
+            const ngData   = (op.ngHourlyData || []).slice(0, 5).map(Number);
+
+            const chart = new Chart(canvas, {
+                data: {
+                    labels: timeLabels,
+                    datasets: [
+                        {
+                            type: 'bar',
+                            label: tr('rpt_actual','Qty'),
+                            data: prodData,
+                            backgroundColor: 'rgba(200,16,46,0.82)',
+                            hoverBackgroundColor: 'rgba(155,11,34,0.92)',
+                            borderRadius: 4, borderSkipped: false,
+                            datalabels: {
+                                anchor: 'end', align: 'top',
+                                font: { weight: 'bold', size: 10 }, color: '#374151',
+                                display: function(ctx) { return Number(ctx.dataset.data[ctx.dataIndex]) > 0; },
+                                formatter: function(v) { return Number(v) >= 1000 ? (Number(v)/1000).toFixed(1)+'k' : Number(v); }
+                            }
+                        },
+                        {
+                            type: 'bar',
+                            label: 'NG',
+                            data: ngData,
+                            backgroundColor: 'rgba(217,119,6,0.72)',
+                            hoverBackgroundColor: 'rgba(180,83,9,0.9)',
+                            borderRadius: 3, borderSkipped: false,
+                            datalabels: {
+                                anchor: 'end', align: 'top',
+                                font: { weight: 'bold', size: 9 }, color: '#D97706',
+                                display: function(ctx) { return Number(ctx.dataset.data[ctx.dataIndex]) > 0; },
+                                formatter: function(v) { return Number(v); }
+                            }
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    layout: { padding: { top: 20 } },
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            backgroundColor: 'rgba(17,24,39,.92)',
+                            padding: 8, cornerRadius: 8,
+                            callbacks: {
+                                title: function(items) { return timeHints[items[0].dataIndex] || ''; },
+                                label: function(ctx) { return '  ' + ctx.dataset.label + ': ' + Number(ctx.parsed.y).toLocaleString(); }
+                            }
+                        },
+                        datalabels: {}
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: 'rgba(0,0,0,0.04)' },
+                            ticks: {
+                                maxTicksLimit: 4, font: { size: 9 },
+                                callback: function(v) { return v >= 1000 ? (v/1000).toFixed(1)+'k' : v; }
+                            }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: {
+                                font: { size: 9, weight: '600' },
+                                maxRotation: 0, minRotation: 0,
+                                align: 'center'
+                            }
+                        }
+                    },
+                    animation: { duration: 400, easing: 'easeOutCubic' }
+                }
+            });
+            opCharts.push(chart);
+        });
     }
 
-    // ── Helpers ───────────────────────────────────────────────────────────────
-    function fmt(v) { return Number(v || 0).toLocaleString(); }
-    function escH(s) {
-        return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-    }
-
-    // ── lang changed ─────────────────────────────────────────────────────────
-    document.addEventListener('langChanged', function () {
-        if (reportData) {
-            renderKPIs(reportData.summary);
-            renderChart(reportData.operations);
-            renderTable(reportData.operations);
-        }
+    // ── Lang changed ─────────────────────────────────────────────────────────
+    document.addEventListener('langChanged', function() {
+        // Re-translate Data Show options
+        const sel = document.getElementById('dataShowFilter');
+        Array.from(sel.options).forEach(function(opt) {
+            const k = opt.getAttribute('data-i18n');
+            if (k && I18N[currentLang] && I18N[currentLang][k]) opt.text = I18N[currentLang][k];
+        });
+        if (reportData) renderOpsGrid(reportData.operations);
     });
 
-    // ── Init ──────────────────────────────────────────────────────────────────
-    window.addEventListener('DOMContentLoaded', function () {
+    // ── Init ─────────────────────────────────────────────────────────────────
+    window.addEventListener('DOMContentLoaded', function() {
         document.getElementById('dateFilter').value = new Date().toISOString().split('T')[0];
         loadReport();
     });

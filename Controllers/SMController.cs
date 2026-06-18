@@ -302,6 +302,7 @@ namespace SMInputProduction.Controllers
                         ngQty, defectRate, actualLabor, targetLabor,
                         actualUPH, targetUPH,
                         hourlyData = hourly, ngHourlyData = ngHourly,
+                        manHourlyData = manHrs,
                     };
                 }).ToList();
 
