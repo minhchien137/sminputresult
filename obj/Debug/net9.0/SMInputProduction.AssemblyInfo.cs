@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("SMInputProduction")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+2662216c6f326f9b21e5fe682889c034caa5d63a")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1e3e135e3647d50110a7c34f0074b70ce38f6f97")]
 [assembly: System.Reflection.AssemblyProductAttribute("SMInputProduction")]
 [assembly: System.Reflection.AssemblyTitleAttribute("SMInputProduction")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

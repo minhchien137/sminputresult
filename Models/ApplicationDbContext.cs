@@ -11,6 +11,7 @@ namespace SMInputProduction.Models
         public DbSet<SVN_Production_result_Viindoo> SVN_Production_result_Viindoo { get; set; }
         public DbSet<SVN_Target> SVN_Target { get; set; }
         public DbSet<SM_InputProductionResultHistory> SM_InputProductionResultHistory { get; set; }
+        public DbSet<SVN_Defect_Record> SVN_Defect_Record { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -21,6 +22,8 @@ namespace SMInputProduction.Models
 
             modelBuilder.Entity<SM_InputProductionResultHistory>()
                 .ToTable("SM_InputProductionResultHistory");
+
+            modelBuilder.Entity<SVN_Defect_Record>().HasNoKey().ToTable("SVN_Defect_Record");
         }
 
     }

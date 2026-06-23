@@ -64,7 +64,8 @@ namespace SMInputProduction.Controllers
                 if (existing != null)
                 {
                     before = GetTimeValue(existing, dto.TimeSlot);
-                    after  = dto.Quantity.Value;
+                    // Defect cộng dồn vào slot, các type khác ghi đè
+                    after  = dto.TypeValue == "Defect" ? before + dto.Quantity.Value : dto.Quantity.Value;
 
                     // UPDATE đúng cột TimeSlot bằng raw SQL
                     var updateSql = $@"UPDATE SVN_Production_result_Viindoo
@@ -123,6 +124,37 @@ namespace SMInputProduction.Controllers
                     Description    = dto.Description
                 });
                 await _context.SaveChangesAsync();
+
+                // Nếu type là Defect thì upsert vào SVN_Defect_Record
+                if (dto.TypeValue == "Defect")
+                {
+                    var existingDefect = await _context.SVN_Defect_Record
+                        .FromSqlRaw(@"SELECT TOP 1 * FROM SVN_Defect_Record
+                                      WHERE Operation = {0} AND INSDatetime = {1} AND Defect_Code = 'R01'",
+                                      dto.Operation, today)
+                        .FirstOrDefaultAsync();
+
+                    if (existingDefect != null)
+                    {
+                        var currentQty = decimal.TryParse(existingDefect.Qty_NG, out var q) ? q : 0;
+                        var newQty     = currentQty + dto.Quantity.Value;
+                        await _context.Database.ExecuteSqlRawAsync(
+                            @"UPDATE SVN_Defect_Record SET Qty_NG = {0}
+                              WHERE Operation = {1} AND INSDatetime = {2} AND Defect_Code = 'R01'",
+                            newQty.ToString("0.######"), dto.Operation, today);
+                    }
+                    else
+                    {
+                        await _context.Database.ExecuteSqlRawAsync(@"
+                            INSERT INTO SVN_Defect_Record
+                                (Item_code, Defect_Code, Qty_NG, INSDatetime, Operation, Employer_code, Employer_name)
+                            VALUES ({0}, 'R01', {1}, {2}, {3}, NULL, NULL)",
+                            dto.Operation,
+                            dto.Quantity.Value.ToString("0.######"),
+                            today,
+                            dto.Operation);
+                    }
+                }
 
                 return Json(new { success = true, message = "Saved successfully!" });
             }
